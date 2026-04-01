@@ -1,0 +1,26 @@
+{
+  "name": "@ggpwnkthx/dom-shared",
+  "version": "0.0.1-rc.0",
+  "exports": {
+    ".": "./src/mod.ts"
+  },
+  "fmt": {
+    "lineWidth": 88,
+    "indentWidth": 2,
+    "useTabs": false,
+    "semiColons": true,
+    "singleQuote": false,
+    "proseWrap": "preserve",
+    "trailingCommas": "onlyMultiLine",
+    "operatorPosition": "nextLine"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "compilerOptions": {
+    "strict": true
+  },
+  "exclude": [".*", "coverage"]
+}
