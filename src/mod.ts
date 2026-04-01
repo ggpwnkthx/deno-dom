@@ -4,4 +4,4 @@
  */
 
 export {} from // TODO: Re-export stable public APIs from leaf packages once defined.
-"../packages/shared/src/mod.ts";
+"@ggpwnkthx/dom-shared";
