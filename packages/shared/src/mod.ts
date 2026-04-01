@@ -3,9 +3,38 @@
  * @module
  */
 
-export class NotImplementedError extends Error {
-  constructor(api: string) {
-    super(`@ggpwnkthx/dom-shared: ${api} is not implemented yet`);
-    this.name = "NotImplementedError";
-  }
-}
+export {
+  assertBoolean,
+  assertExists,
+  assertFunction,
+  assertNever,
+  assertNotImplemented,
+  assertNumber,
+  assertString,
+} from "./assert.ts";
+
+export {
+  DOMSharedError,
+  err,
+  InvariantError,
+  NotImplementedError,
+  ok,
+  ValidationError,
+} from "./errors.ts";
+export type { ErrorContext, Result } from "./errors.ts";
+
+export {
+  isBoolean,
+  isFunction,
+  isNonNull,
+  isNumber,
+  isPromiseLike,
+  isString,
+  requireFunction,
+  requireNonNull,
+  requireNumber,
+  requireString,
+} from "./validation.ts";
+
+export type { Brand, ContainerId, NodeId } from "./types.ts";
+export { isContainerId, isNodeId } from "./types.ts";
