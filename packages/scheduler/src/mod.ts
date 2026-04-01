@@ -3,12 +3,16 @@
  * @module
  */
 
-import { NotImplementedError } from "@ggpwnkthx/dom-shared";
+export {
+  createScheduler,
+  flushUpdates,
+  getDiagnostics,
+  queueUpdate,
+  resetScheduler,
+  schedule,
+} from "./scheduler.ts";
 
-export function queueUpdate(): never {
-  throw new NotImplementedError("queueUpdate");
-}
-
-export function schedule(): never {
-  throw new NotImplementedError("schedule");
-}
+export type { Scheduler, SchedulerConfig, SchedulerDiagnostics } from "./types.ts";
+export type { LoopGuardResult } from "./types.ts";
+export type { Queue, QueueDiagnostics } from "./queue.ts";
+export type { LoopGuard } from "./guards.ts";
