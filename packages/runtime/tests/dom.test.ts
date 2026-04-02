@@ -6,7 +6,7 @@ import {
   replaceNode,
   setProp,
   setText,
-} from "../src/dom/create.ts";
+} from "../src/dom/mod.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 
 Deno.test("createDom creates text node from TextVNode", () => {
@@ -85,14 +85,14 @@ Deno.test("setProp sets style object", () => {
 Deno.test("removeProp removes class", () => {
   const el = document.createElement("div");
   el.className = "my-class";
-  removeProp(el, "class", "my-class");
+  removeProp(el, "class");
   assertEquals(el.className, "");
 });
 
 Deno.test("removeProp removes id attribute", () => {
   const el = document.createElement("div");
   el.id = "my-id";
-  removeProp(el, "id", "my-id");
+  removeProp(el, "id");
   assertEquals(el.id, "");
 });
 
@@ -134,6 +134,6 @@ Deno.test("setProp sets aria-hidden attribute", () => {
 Deno.test("removeProp removes aria-label attribute", () => {
   const el = document.createElement("div");
   (el as HTMLElement).ariaLabel = "main";
-  removeProp(el, "aria-label", "main");
+  removeProp(el, "aria-label");
   assertEquals((el as HTMLElement).ariaLabel, "");
 });

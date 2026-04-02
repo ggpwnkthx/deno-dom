@@ -1,6 +1,5 @@
 import { assertEquals } from "@std/assert@1.0.19";
 import {
-  createScheduler,
   flushUpdates,
   getDiagnostics,
   queueUpdate,
@@ -132,7 +131,7 @@ Deno.test("nested flushUpdates calls are detected by loop guard", () => {
     // Expected when exceeding loop depth
   }
 
-  const diag = getDiagnostics();
+  const _diag = getDiagnostics();
   assertEquals(outerDepth > 0, true);
   assertEquals(innerDepth, 1);
 });

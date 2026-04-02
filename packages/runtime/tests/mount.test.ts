@@ -4,7 +4,7 @@ import {
   createFragmentVNode,
   createTextVNode,
 } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { mount } from "../src/mount/mount.ts";
+import { mount } from "../src/mount.ts";
 import { getDomRef } from "../src/types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 
