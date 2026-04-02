@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.6] - 2026-04-02
+
+### Changed
+
+- `@ggpwnkthx/dom-hydrate`: Removed `contract.ts` documentation (content migrated to README.md)
+- `@ggpwnkthx/dom-hydrate`: Import path migration from `jsr:@ggpwnkthx/jsx@0.1.8` to `@ggpwnkthx/jsx`
+- `@ggpwnkthx/dom-runtime`: Import path migration from `jsr:@ggpwnkthx/jsx@0.1.8` to `@ggpwnkthx/jsx`
+- `@ggpwnkthx/dom-runtime`: Re-exported vnode guards (`isVNode`, `isElementVNode`, etc.) from `@ggpwnkthx/jsx` directly instead of duplicating
+- `@ggpwnkthx/dom-runtime`: `removeProp` signature simplified — dead `_oldValue` parameter removed
+- All packages: Test import paths updated to use `@ggpwnkthx/jsx` bare specifier
+
+### Fixed
+
+- `@ggpwnkthx/dom-hydrate`: Removed unused `jsr:@ggpwnkthx/ssr@0.1.1` dependency
+- `@ggpwnkthx/dom-hydrate`: Added missing `@b-fuze/deno-dom` for DOM type references
+
 ## [0.0.1-rc.5] - 2026-04-02
 
 ### Changed

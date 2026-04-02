@@ -5,10 +5,8 @@
     ".": "./src/mod.ts"
   },
   "imports": {
-    "jsr:@ggpwnkthx/jsx@0.1.8": "jsr:@ggpwnkthx/jsx@0.1.8",
-    "jsr:@ggpwnkthx/ssr@0.1.1": "jsr:@ggpwnkthx/ssr@0.1.1",
-    "jsr:@ggpwnkthx/dom-runtime": "jsr:@ggpwnkthx/dom-runtime@0.0.1-rc.1",
-    "jsr:@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@0.0.1-rc.1"
+    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1",
+    "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1"
   },
   "fmt": {
     "lineWidth": 88,

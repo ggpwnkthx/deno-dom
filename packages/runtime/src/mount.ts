@@ -8,11 +8,12 @@ import {
   isElementVNode,
   isFragmentVNode,
   isTextVNode,
+  isVNode,
   type VNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+} from "@ggpwnkthx/jsx";
 import { createDom, setProp } from "./dom/mod.ts";
 import { isEventProp, setEventHandler } from "./events.ts";
-import { isVNode, setDomRef } from "./types.ts";
+import { setDomRef } from "./types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 
 const MAX_MOUNT_DEPTH = 1000;

@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert@1.0.19";
-import { createElementVNode, createTextVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import { createElementVNode, createTextVNode } from "@ggpwnkthx/jsx";
 import {
   createDom,
   removeProp,

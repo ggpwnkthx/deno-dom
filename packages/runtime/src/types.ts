@@ -3,26 +3,7 @@
  * @module
  */
 
-import type {
-  ComponentVNode,
-  ElementVNode,
-  FragmentVNode,
-  Key,
-  TextVNode,
-  VNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
-
-export type { ComponentVNode, ElementVNode, FragmentVNode, Key, TextVNode, VNode };
-
-export type { VNodeKind } from "jsr:@ggpwnkthx/jsx@0.1.8";
-
-export {
-  isComponentVNode,
-  isElementVNode,
-  isFragmentVNode,
-  isTextVNode,
-  isVNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+import type { VNode } from "@ggpwnkthx/jsx";
 
 const domRefs = new WeakMap<VNode, Node>();
 

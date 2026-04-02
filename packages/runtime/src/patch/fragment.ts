@@ -3,7 +3,7 @@
  * @module
  */
 
-import type { FragmentVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import type { FragmentVNode } from "@ggpwnkthx/jsx";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { diffChildren, type PatchFn } from "./diff-children.ts";
 

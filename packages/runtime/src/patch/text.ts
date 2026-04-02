@@ -3,7 +3,7 @@
  * @module
  */
 
-import type { TextVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import type { TextVNode } from "@ggpwnkthx/jsx";
 import { setText } from "../dom/mod.ts";
 
 export function patchText(

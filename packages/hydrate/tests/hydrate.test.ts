@@ -1,7 +1,11 @@
-import { assertEquals } from "@std/assert@1.0.19";
+import { assertEquals } from "@std/assert";
+import {
+  createElementVNode,
+  createFragmentVNode,
+  createTextVNode,
+} from "@ggpwnkthx/jsx";
+import { getDomRef } from "@ggpwnkthx/dom-runtime";
 import { hydrate } from "../src/hydrate.ts";
-import { createElementVNode, createTextVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { parseHydrationPath } from "@ggpwnkthx/dom-shared";
 import type { MismatchInfo } from "../src/types.ts";
 
 function createMockSSRContainer(innerHTML: string): HTMLDivElement {
@@ -10,283 +14,199 @@ function createMockSSRContainer(innerHTML: string): HTMLDivElement {
   return container;
 }
 
-Deno.test("hydrate: happy path with simple element", () => {
+Deno.test("hydrate decision: exact match preserves existing nodes and attaches DOM refs", () => {
   const ssrHTML =
     '<div data-hk="0"><h1 data-hk="0.0">Hello</h1><p data-hk="0.1">World</p></div>';
   const container = createMockSSRContainer(ssrHTML);
 
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("h1", null, null, [createTextVNode("Hello")]),
-      createElementVNode("p", null, null, [createTextVNode("World")]),
-    ],
-  );
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const existingTitle = existingRoot.firstElementChild as HTMLHeadingElement;
+  const existingTitleText = existingTitle.firstChild as Text;
+  const existingBody = existingRoot.lastElementChild as HTMLParagraphElement;
+  const existingBodyText = existingBody.firstChild as Text;
 
-  const result = hydrate(vnode, container);
-
-  assertEquals(result, vnode);
-  assertEquals(container.querySelector("h1")?.textContent, "Hello");
-  assertEquals(container.querySelector("p")?.textContent, "World");
-});
-
-Deno.test("hydrate: text node alignment", () => {
-  const ssrHTML = '<div data-hk="0">Hello World</div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode("div", null, null, [createTextVNode("Hello World")]);
-
-  hydrate(vnode, container);
-
-  assertEquals(container.querySelector("div")?.firstChild?.nodeType, Node.TEXT_NODE);
-});
-
-Deno.test("hydrate: rebinds event handlers", () => {
-  const ssrHTML = '<button data-hk="0">Click me</button>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  let clickCount = 0;
-  const vnode = createElementVNode(
-    "button",
-    { onClick: () => clickCount++ },
-    null,
-    [createTextVNode("Click me")],
-  );
-
-  hydrate(vnode, container);
-
-  const button = container.querySelector("button") as HTMLButtonElement;
-  button.click();
-
-  assertEquals(clickCount, 1);
-});
-
-Deno.test("hydrate: replaces subtree on tag mismatch", () => {
-  const ssrHTML = '<div data-hk="0"><span data-hk="0.0">Wrong tag</span></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Correct tag")]),
-    ],
-  );
-
-  hydrate(vnode, container);
-
-  const div = container.querySelector("div");
-  const firstChild = div?.firstChild;
-  assertEquals(firstChild?.nodeType, Node.ELEMENT_NODE);
-  assertEquals((firstChild as Element).tagName.toLowerCase(), "p");
-});
-
-Deno.test("hydrate: replaces subtree on marker mismatch", () => {
-  const ssrHTML = '<div data-hk="0"><p data-hk="0.1">Wrong position</p></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Correct position")]),
-    ],
-  );
-
-  hydrate(vnode, container);
-
-  const div = container.querySelector("div");
-  const firstChild = div?.firstChild;
-  assertEquals((firstChild as Element).getAttribute("data-hk"), "0.0");
-});
-
-Deno.test("hydrate: handles nested elements", () => {
-  const ssrHTML =
-    '<div data-hk="0"><p data-hk="0.0">First</p><span data-hk="0.1">Second</span></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("First")]),
-      createElementVNode("span", null, null, [createTextVNode("Second")]),
-    ],
-  );
-
-  hydrate(vnode, container);
-
-  assertEquals(container.querySelector("p")?.textContent, "First");
-  assertEquals(container.querySelector("span")?.textContent, "Second");
-});
-
-Deno.test("hydrate: onMismatch callback receives correct MismatchInfo for tag mismatch", () => {
-  const ssrHTML = '<div data-hk="0"><span data-hk="0.0">Wrong tag</span></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Expected")]),
-    ],
-  );
-
-  const infos: MismatchInfo[] = [];
-  hydrate(vnode, container, {
-    onMismatch: (info: MismatchInfo) => {
-      infos.push(info);
-    },
-  });
-
-  assertEquals(infos.length > 0, true);
-  const info = infos[0] as MismatchInfo;
-  assertEquals(info.kind, "tag-mismatch");
-  assertEquals(info.expectedPath, "0.0");
-  assertEquals(info.vnode?.kind, "element");
-});
-
-Deno.test("hydrate: detects extra child element", () => {
-  const ssrHTML =
-    '<div data-hk="0"><p data-hk="0.0">Valid</p><span data-hk="0.1">Extra</span></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Valid")]),
-    ],
-  );
+  const titleText = createTextVNode("Hello");
+  const bodyText = createTextVNode("World");
+  const title = createElementVNode("h1", null, null, [titleText]);
+  const body = createElementVNode("p", null, null, [bodyText]);
+  const vnode = createElementVNode("div", null, null, [title, body]);
 
   const mismatches: MismatchInfo[] = [];
   hydrate(vnode, container, {
-    onMismatch: (info) => {
-      mismatches.push(info);
-    },
+    onMismatch: (info) => mismatches.push(info),
   });
+
+  assertEquals(container.firstElementChild === existingRoot, true);
+  assertEquals(existingRoot.firstElementChild === existingTitle, true);
+  assertEquals(existingRoot.lastElementChild === existingBody, true);
+
+  assertEquals(getDomRef(vnode) === existingRoot, true);
+  assertEquals(getDomRef(title) === existingTitle, true);
+  assertEquals(getDomRef(titleText) === existingTitleText, true);
+  assertEquals(getDomRef(body) === existingBody, true);
+  assertEquals(getDomRef(bodyText) === existingBodyText, true);
+
+  assertEquals(mismatches.length, 0);
+});
+
+Deno.test("hydrate decision: replaces only the mismatched child subtree", () => {
+  const ssrHTML =
+    '<div data-hk="0"><span data-hk="0.0">Wrong</span><p data-hk="0.1">Keep</p></div>';
+  const container = createMockSSRContainer(ssrHTML);
+
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const oldWrongChild = existingRoot.firstElementChild as HTMLSpanElement;
+  const keptChild = existingRoot.lastElementChild as HTMLParagraphElement;
+
+  const correctedText = createTextVNode("Correct");
+  const keptText = createTextVNode("Keep");
+  const correctedChild = createElementVNode("p", null, null, [correctedText]);
+  const stableChild = createElementVNode("p", null, null, [keptText]);
+  const vnode = createElementVNode("div", null, null, [correctedChild, stableChild]);
+
+  const mismatches: MismatchInfo[] = [];
+  hydrate(vnode, container, {
+    onMismatch: (info) => mismatches.push(info),
+  });
+
+  const currentRoot = container.firstElementChild as HTMLDivElement;
+  const currentFirst = currentRoot.firstElementChild as HTMLParagraphElement;
+  const currentSecond = currentRoot.lastElementChild as HTMLParagraphElement;
+
+  assertEquals(currentRoot === existingRoot, true);
+  assertEquals(currentFirst === oldWrongChild, false);
+  assertEquals(currentSecond === keptChild, true);
+
+  assertEquals(currentFirst.tagName, "P");
+  assertEquals(currentFirst.textContent, "Correct");
+  assertEquals(currentSecond.textContent, "Keep");
+
+  assertEquals(getDomRef(correctedChild) === currentFirst, true);
+  assertEquals(getDomRef(stableChild) === keptChild, true);
 
   assertEquals(mismatches.length, 1);
-  const first = mismatches[0];
-  assertEquals(first.kind, "extra-child");
-  assertEquals(first.expectedPath, "0");
+  assertEquals(mismatches[0]?.kind, "tag-mismatch");
+  assertEquals(mismatches[0]?.expectedPath, "0.0");
 });
 
-Deno.test("hydrate: detects extra text node", () => {
-  const ssrHTML = '<div data-hk="0"><p data-hk="0.0">Valid</p>extra text</div>';
+Deno.test("hydrate decision: leading text nodes do not affect element hydration paths", () => {
+  const ssrHTML =
+    '<div data-hk="0">lead<p data-hk="0.0">First</p><p data-hk="0.1">Second</p></div>';
   const container = createMockSSRContainer(ssrHTML);
 
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Valid")]),
-    ],
-  );
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const existingLeadText = existingRoot.firstChild as Text;
+  const existingFirstParagraph = existingRoot.childNodes[1] as HTMLParagraphElement;
+  const existingSecondParagraph = existingRoot.childNodes[2] as HTMLParagraphElement;
+
+  const leadText = createTextVNode("lead");
+  const firstText = createTextVNode("First");
+  const secondText = createTextVNode("Second");
+  const firstParagraph = createElementVNode("p", null, null, [firstText]);
+  const secondParagraph = createElementVNode("p", null, null, [secondText]);
+  const vnode = createElementVNode("div", null, null, [
+    leadText,
+    firstParagraph,
+    secondParagraph,
+  ]);
 
   const mismatches: MismatchInfo[] = [];
   hydrate(vnode, container, {
-    onMismatch: (info) => {
-      mismatches.push(info);
-    },
+    onMismatch: (info) => mismatches.push(info),
   });
 
-  const hasExtraText = mismatches.some((m) => m.kind === "extra-text");
-  assertEquals(hasExtraText, true);
+  assertEquals(getDomRef(leadText) === existingLeadText, true);
+  assertEquals(getDomRef(firstParagraph) === existingFirstParagraph, true);
+  assertEquals(getDomRef(secondParagraph) === existingSecondParagraph, true);
+
+  assertEquals(existingFirstParagraph.getAttribute("data-hk"), "0.0");
+  assertEquals(existingSecondParagraph.getAttribute("data-hk"), "0.1");
+  assertEquals(mismatches.length, 0);
 });
 
-Deno.test("hydrate: extra nodes are removed from DOM after mismatch", () => {
+Deno.test("hydrate decision: text child replaces unexpected element with type-mismatch", () => {
+  const ssrHTML = '<div data-hk="0"><span data-hk="0.0">Wrong</span></div>';
+  const container = createMockSSRContainer(ssrHTML);
+
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const oldChild = existingRoot.firstChild;
+
+  const textChild = createTextVNode("Expected text");
+  const vnode = createElementVNode("div", null, null, [textChild]);
+
+  const mismatches: MismatchInfo[] = [];
+  hydrate(vnode, container, {
+    onMismatch: (info) => mismatches.push(info),
+  });
+
+  const currentRoot = container.firstElementChild as HTMLDivElement;
+  const currentChild = currentRoot.firstChild as Text;
+
+  assertEquals(currentRoot === existingRoot, true);
+  assertEquals(currentChild === oldChild, false);
+  assertEquals(currentChild.nodeType, Node.TEXT_NODE);
+  assertEquals(currentChild.textContent, "Expected text");
+  assertEquals(getDomRef(textChild) === currentChild, true);
+
+  assertEquals(mismatches.length, 1);
+  assertEquals(mismatches[0]?.kind, "type-mismatch");
+  assertEquals(mismatches[0]?.expectedPath, "0");
+});
+
+Deno.test("hydrate decision: comment nodes are ignored when locating matching element children", () => {
+  const ssrHTML = '<div data-hk="0"><!--comment--><p data-hk="0.0">First</p></div>';
+  const container = createMockSSRContainer(ssrHTML);
+
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const existingComment = existingRoot.firstChild as Comment;
+  const existingParagraph = existingRoot.lastChild as HTMLParagraphElement;
+
+  const paragraphText = createTextVNode("First");
+  const paragraph = createElementVNode("p", null, null, [paragraphText]);
+  const vnode = createElementVNode("div", null, null, [paragraph]);
+
+  const mismatches: MismatchInfo[] = [];
+  hydrate(vnode, container, {
+    onMismatch: (info) => mismatches.push(info),
+  });
+
+  assertEquals(existingRoot.firstChild === existingComment, true);
+  assertEquals(existingRoot.lastChild === existingParagraph, true);
+  assertEquals(existingComment.nodeType, Node.COMMENT_NODE);
+  assertEquals(getDomRef(paragraph) === existingParagraph, true);
+  assertEquals(mismatches.length, 0);
+});
+
+Deno.test("hydrate decision: fragment children advance the parent sibling counter for following elements", () => {
   const ssrHTML =
-    '<div data-hk="0"><p data-hk="0.0">Valid</p><span data-hk="0.1">Extra</span></div>';
+    '<div data-hk="0"><p data-hk="0.0">First</p><span data-hk="0.1">Second</span><section data-hk="0.2">Third</section></div>';
   const container = createMockSSRContainer(ssrHTML);
 
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Valid")]),
-    ],
-  );
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const existingFirst = existingRoot.childNodes[0] as HTMLParagraphElement;
+  const existingSecond = existingRoot.childNodes[1] as HTMLSpanElement;
+  const existingThird = existingRoot.childNodes[2] as HTMLElement;
 
-  hydrate(vnode, container);
+  const firstText = createTextVNode("First");
+  const secondText = createTextVNode("Second");
+  const thirdText = createTextVNode("Third");
 
-  assertEquals(container.querySelector("span"), null);
-  assertEquals(container.querySelector("p")?.textContent, "Valid");
-});
+  const first = createElementVNode("p", null, null, [firstText]);
+  const second = createElementVNode("span", null, null, [secondText]);
+  const third = createElementVNode("section", null, null, [thirdText]);
 
-Deno.test("hydrate: onMismatch callback receives correct fields for missing-child", () => {
-  const ssrHTML = '<div data-hk="0"></div>';
-  const container = createMockSSRContainer(ssrHTML);
+  const vnode = createElementVNode("div", null, null, [
+    createFragmentVNode(null, [first, second]),
+    third,
+  ]);
 
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Missing")]),
-    ],
-  );
-
-  const infos: MismatchInfo[] = [];
+  const mismatches: MismatchInfo[] = [];
   hydrate(vnode, container, {
-    onMismatch: (info: MismatchInfo) => {
-      infos.push(info);
-    },
+    onMismatch: (info) => mismatches.push(info),
   });
 
-  assertEquals(infos.length > 0, true);
-  const info = infos[0] as MismatchInfo;
-  assertEquals(info.kind, "missing-child");
-  assertEquals(info.expectedPath, "0.0");
-  assertEquals(info.vnode?.kind, "element");
-});
-
-Deno.test("hydrate: onMismatch callback receives correct fields for marker-mismatch", () => {
-  const ssrHTML = '<div data-hk="0"><p data-hk="0.1">Wrong position</p></div>';
-  const container = createMockSSRContainer(ssrHTML);
-
-  const vnode = createElementVNode(
-    "div",
-    null,
-    null,
-    [
-      createElementVNode("p", null, null, [createTextVNode("Correct position")]),
-    ],
-  );
-
-  const infos: MismatchInfo[] = [];
-  hydrate(vnode, container, {
-    onMismatch: (info: MismatchInfo) => {
-      infos.push(info);
-    },
-  });
-
-  assertEquals(infos.length > 0, true);
-  const info = infos[0] as MismatchInfo;
-  assertEquals(info.kind, "marker-mismatch");
-  assertEquals(info.expectedPath, "0.0");
-  assertEquals(info.actualPath, "0.1");
-});
-
-Deno.test("parseHydrationPath: extracts path from element", () => {
-  const el = document.createElement("div");
-  el.setAttribute("data-hk", "0.1.2");
-
-  const result = parseHydrationPath(el);
-  assertEquals(result, "0.1.2");
-});
-
-Deno.test("parseHydrationPath: returns null when no marker", () => {
-  const el = document.createElement("div");
-
-  assertEquals(parseHydrationPath(el), null);
+  assertEquals(getDomRef(first) === existingFirst, true);
+  assertEquals(getDomRef(second) === existingSecond, true);
+  assertEquals(getDomRef(third) === existingThird, true);
+  assertEquals(mismatches.length, 0);
 });

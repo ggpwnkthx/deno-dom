@@ -9,11 +9,12 @@ import {
   isElementVNode,
   isFragmentVNode,
   isTextVNode,
+  isVNode,
   type TextVNode,
   type VNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+} from "@ggpwnkthx/jsx";
 import { createDom, replaceNode } from "../dom/mod.ts";
-import { isVNode, removeDomRef, setDomRef } from "../types.ts";
+import { removeDomRef, setDomRef } from "../types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { patchText } from "./text.ts";
 import { patchProps } from "./props.ts";

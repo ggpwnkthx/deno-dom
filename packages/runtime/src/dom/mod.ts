@@ -11,7 +11,7 @@ import {
   isTextVNode,
   type TextVNode,
   type VNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+} from "@ggpwnkthx/jsx";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { setProp } from "./set-prop.ts";
 

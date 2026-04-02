@@ -5,7 +5,7 @@
  * @module
  */
 
-import type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import type { VNode } from "@ggpwnkthx/jsx";
 import type { HydrationPath } from "@ggpwnkthx/dom-shared";
 
 export type MismatchKind =

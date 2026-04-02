@@ -3,7 +3,7 @@
  * @module
  */
 
-import type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import type { VNode } from "@ggpwnkthx/jsx";
 import { createDom } from "../dom/mod.ts";
 import { removeDomRef, setDomRef } from "../types.ts";
 

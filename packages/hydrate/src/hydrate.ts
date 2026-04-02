@@ -9,21 +9,23 @@ import {
   buildHydrationPath,
   type HydrationPath,
   parseHydrationPath,
+  InvariantError,
 } from "@ggpwnkthx/dom-shared";
 import {
   createDom,
-  isElementVNode,
-  isFragmentVNode,
-  isTextVNode,
-  isVNode,
   setDomRef,
   setEventHandler,
   setProp,
 } from "@ggpwnkthx/dom-runtime";
-import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { warnMismatch } from "./diagnostics.ts";
 import type { MismatchInfo } from "./types.ts";
-import type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+import {
+  isElementVNode,
+  isFragmentVNode,
+  isTextVNode,
+  isVNode,
+  type VNode
+} from "@ggpwnkthx/jsx";
 
 const MAX_HYDRATE_DEPTH = 1000;
 

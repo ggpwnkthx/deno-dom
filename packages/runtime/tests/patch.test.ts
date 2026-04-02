@@ -4,7 +4,7 @@ import {
   createElementVNode,
   createFragmentVNode,
   createTextVNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+} from "@ggpwnkthx/jsx";
 import { mount, patch } from "../src/mod.ts";
 
 Deno.test("patch updates text content", () => {

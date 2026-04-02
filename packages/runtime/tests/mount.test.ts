@@ -3,7 +3,7 @@ import {
   createElementVNode,
   createFragmentVNode,
   createTextVNode,
-} from "jsr:@ggpwnkthx/jsx@0.1.8";
+} from "@ggpwnkthx/jsx";
 import { mount } from "../src/mount.ts";
 import { getDomRef } from "../src/types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
