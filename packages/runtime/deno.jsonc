@@ -20,7 +20,12 @@
     }
   },
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "lib": ["deno.ns", "dom"]
   },
-  "exclude": [".*", "coverage"]
+  "exclude": [".*", "coverage"],
+  "imports": {
+    "@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.0",
+    "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1.8"
+  }
 }

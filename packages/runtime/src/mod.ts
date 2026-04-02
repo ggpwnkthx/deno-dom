@@ -3,12 +3,9 @@
  * @module
  */
 
-import { NotImplementedError } from "@ggpwnkthx/dom-shared";
+import { mount } from "./mount.ts";
+import { patch } from "./patch.ts";
 
-export function mount(): never {
-  throw new NotImplementedError("mount");
-}
+export { mount, patch };
 
-export function patch(): never {
-  throw new NotImplementedError("patch");
-}
+export type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
