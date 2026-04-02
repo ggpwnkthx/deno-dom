@@ -9,3 +9,15 @@ import { patch } from "./patch.ts";
 export { mount, patch };
 
 export type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
+
+export {
+  isComponentVNode,
+  isElementVNode,
+  isFragmentVNode,
+  isTextVNode,
+  isVNode,
+} from "./types.ts";
+
+export { createDom, replaceNode, setProp, setText } from "./dom.ts";
+export { getDomRef, removeDomRef, setDomRef } from "./types.ts";
+export { isEventProp, setEventHandler } from "./events.ts";

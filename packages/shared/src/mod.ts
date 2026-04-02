@@ -38,3 +38,11 @@ export {
 
 export type { Brand, ContainerId, NodeId } from "./types.ts";
 export { isContainerId, isNodeId } from "./types.ts";
+
+export {
+  buildHydrationPath,
+  HYDRATION_ATTR,
+  isHydrationPath,
+  parseHydrationPath,
+} from "./hydration.ts";
+export type { HydrationPath } from "./hydration.ts";

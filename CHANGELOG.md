@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.3] - 2026-04-02
+
+### Added
+
+- `@ggpwnkthx/dom-hydrate` package for SSR hydration
+  - `src/types.ts`: `MismatchKind` union (6 variants), `MismatchInfo` interface with `vnode: VNode | null`, `path`, `kind`, `domNode`
+  - `src/contract.ts`: JSDoc documentation of marker semantics, shape matching rules, mismatch categories, replacement policy, fragment handling
+  - `src/diagnostics.ts`: `formatMismatchKind`, `formatMismatch`, `warnMismatch` for mismatch reporting
+  - `src/hydrate.ts`: Core implementation — `hydrate()`, `hydrateElement()`, `hydrateTextNode()`, `hydrateElementNode()`, `hydrateFragmentNode()`, `hydrateComponentNode()`, `hydrateChildren()`, `detectExtraChildren()`, `applyProps()`, `replaceWith()`
+  - `src/mod.ts`: Public entry point exporting `hydrate`, `MismatchInfo`, `MismatchKind`, `HydrateOptions`
+  - Full test suite: 13 tests covering all mismatch types, field validation, DOM removal, event rebinding
+  - `data-hk` marker alignment via dot-separated hydration paths
+  - Dual-cursor DOM walking algorithm with `elementIndex`/`domIndex` invariant
+  - Event handler rebinding without component remount via `setEventHandler`
+  - `extra-child`/`extra-text` mismatch detection with DOM node removal
+  - `replaceWith` with fail-fast on detached nodes
+  - Depth guard (`MAX_HYDRATE_DEPTH`) to prevent stack overflow
+  - Typed error hierarchy via `InvariantError`
+- `@ggpwnkthx/dom-shared` additions:
+  - `src/hydration.ts`: `HYDRATION_ATTR` constant, `HydrationPath` branded type, `isHydrationPath()`, `parseHydrationPath()`, `buildHydrationPath()`
+  - Updated `mod.ts` exports for hydration helpers
+- `@ggpwnkthx/dom-runtime` additions:
+  - Extended `mod.ts` exports: `isVNode`, `isElementVNode`, `isFragmentVNode`, `isTextVNode`, `isComponentVNode`, `createDom`, `setDomRef`, `getDomRef`, `setProp`, `setEventHandler`, `isEventProp`
+
 ## [0.0.1-rc.2] - 2026-04-02
 
 ### Added
