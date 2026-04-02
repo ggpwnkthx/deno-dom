@@ -1,6 +1,12 @@
 import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert@1.0.19";
 import { createElementVNode, createTextVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { createDom, removeProp, replaceNode, setProp, setText } from "../src/dom.ts";
+import {
+  createDom,
+  removeProp,
+  replaceNode,
+  setProp,
+  setText,
+} from "../src/dom/create.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 
 Deno.test("createDom creates text node from TextVNode", () => {

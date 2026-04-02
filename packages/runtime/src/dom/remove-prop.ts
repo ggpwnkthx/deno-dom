@@ -3,12 +3,10 @@
  * @module
  */
 
-import { isEventProp } from "./events.ts";
+import { assertIsNotEventProp, normalizeAriaName } from "../events.ts";
 
 export function removeProp(el: Element, name: string): void {
-  if (isEventProp(name)) {
-    return;
-  }
+  assertIsNotEventProp(name);
   if (name === "class") {
     el.className = "";
     return;
@@ -44,7 +42,7 @@ export function removeProp(el: Element, name: string): void {
     return;
   }
   if (name.startsWith("aria-")) {
-    const ariaKey = "aria" + name.slice(5, 6).toUpperCase() + name.slice(6);
+    const ariaKey = normalizeAriaName(name);
     (el as unknown as Record<string, string>)[ariaKey] = "";
     return;
   }

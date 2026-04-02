@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.5] - 2026-04-02
+
+### Changed
+
+- All test files renamed from `*.test.ts` to `*.test.ts` (consistent naming convention)
+- `@ggpwnkthx/dom-runtime`: Source files reorganized into focused subdirectories
+  - `src/dom.ts` → `src/dom/` directory with `set-prop.ts`, `remove-prop.ts` modules
+  - `src/patch.ts` → `src/patch/` directory with `text.ts`, `props.ts`, `fragment.ts`, `diff-children.ts` modules
+- `@ggpwnkthx/dom-scheduler`: Scheduler instance refactored into `src/instance.ts` module
+
 ## [0.0.1-rc.4] - 2026-04-02
 
 ### Changed

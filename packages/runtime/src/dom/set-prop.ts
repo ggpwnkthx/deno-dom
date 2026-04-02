@@ -3,12 +3,10 @@
  * @module
  */
 
-import { isEventProp } from "./events.ts";
+import { assertIsNotEventProp, normalizeAriaName } from "../events.ts";
 
 export function setProp(el: Element, name: string, value: unknown): void {
-  if (isEventProp(name)) {
-    return;
-  }
+  assertIsNotEventProp(name);
   if (value === null || value === undefined) {
     return;
   }
@@ -59,7 +57,7 @@ export function setProp(el: Element, name: string, value: unknown): void {
     return;
   }
   if (name.startsWith("aria-")) {
-    const ariaKey = "aria" + name.slice(5, 6).toUpperCase() + name.slice(6);
+    const ariaKey = normalizeAriaName(name);
     (el as unknown as Record<string, string>)[ariaKey] = String(value);
     return;
   }

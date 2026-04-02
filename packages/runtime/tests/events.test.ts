@@ -5,7 +5,7 @@ import {
   normalizeEventName,
   removeEventListener,
   setEventHandler,
-} from "../src/events.ts";
+} from "../src/events/events.ts";
 
 Deno.test("isEventProp returns true for onClick", () => {
   assertEquals(isEventProp("onClick"), true);

@@ -4,8 +4,8 @@
  */
 
 import type { VNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { createDom } from "./dom.ts";
-import { removeDomRef, setDomRef } from "./types.ts";
+import { createDom } from "../dom/mod.ts";
+import { removeDomRef, setDomRef } from "../types.ts";
 
 export type PatchFn = (
   oldVNode: VNode,

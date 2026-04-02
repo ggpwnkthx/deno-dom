@@ -4,7 +4,7 @@
  */
 
 import type { TextVNode } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { setText } from "./dom.ts";
+import { setText } from "../dom/mod.ts";
 
 export function patchText(
   oldVNode: TextVNode,

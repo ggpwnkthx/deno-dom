@@ -12,11 +12,11 @@ import {
   type TextVNode,
   type VNode,
 } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { createDom, replaceNode } from "./dom.ts";
-import { isVNode, removeDomRef, setDomRef } from "./types.ts";
+import { createDom, replaceNode } from "../dom/mod.ts";
+import { isVNode, removeDomRef, setDomRef } from "../types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
-import { patchText } from "./patch-text.ts";
-import { patchProps } from "./patch-props.ts";
+import { patchText } from "./text.ts";
+import { patchProps } from "./props.ts";
 import { diffChildren, type PatchFn } from "./diff-children.ts";
 
 const MAX_PATCH_DEPTH = 1000;

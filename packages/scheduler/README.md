@@ -4,7 +4,7 @@ Microtask batching and rerender scheduling.
 
 ## Status
 
-**Reserved** — no scheduling logic implemented yet. This package exists to establish package boundaries.
+**Implemented** — microtask batching, deduplication, and rerender scheduling.
 
 ## Purpose
 

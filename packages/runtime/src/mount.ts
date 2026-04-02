@@ -4,12 +4,13 @@
  */
 
 import {
+  type FragmentVNode,
   isElementVNode,
   isFragmentVNode,
   isTextVNode,
   type VNode,
 } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { createDom, setProp } from "./dom.ts";
+import { createDom, setProp } from "./dom/mod.ts";
 import { isEventProp, setEventHandler } from "./events.ts";
 import { isVNode, setDomRef } from "./types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
@@ -67,7 +68,8 @@ function createDomWithChildren(vnode: VNode, depth: number): Node {
   }
   if (isFragmentVNode(vnode)) {
     const fragment = document.createDocumentFragment();
-    const children = (vnode as { children?: readonly unknown[] }).children;
+    const fragmentVNode = vnode as FragmentVNode;
+    const children = fragmentVNode.children;
     if (children) {
       for (const child of children) {
         if (child === null || child === undefined) continue;

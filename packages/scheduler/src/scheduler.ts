@@ -4,7 +4,7 @@ import type {
   SchedulerConfig,
   SchedulerDiagnostics,
 } from "./types.ts";
-import { createSchedulerInstance } from "./scheduler-instance.ts";
+import { createSchedulerInstance } from "./instance.ts";
 
 let _globalScheduler: Scheduler | null = null;
 

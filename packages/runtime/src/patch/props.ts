@@ -4,8 +4,8 @@
  */
 
 import { InvariantError } from "@ggpwnkthx/dom-shared";
-import { removeProp, setProp } from "./dom.ts";
-import { isEventProp, setEventHandler } from "./events.ts";
+import { removeProp, setProp } from "../dom/mod.ts";
+import { isEventProp, setEventHandler } from "../events.ts";
 
 export function patchProps(
   el: Element,

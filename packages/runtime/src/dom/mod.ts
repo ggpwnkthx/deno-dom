@@ -13,7 +13,7 @@ import {
   type VNode,
 } from "jsr:@ggpwnkthx/jsx@0.1.8";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
-import { setProp } from "./dom-set-prop.ts";
+import { setProp } from "./set-prop.ts";
 
 export function createDom(vnode: VNode): Node {
   if (isTextVNode(vnode)) {
@@ -54,5 +54,5 @@ export function replaceNode(oldDom: Node, newDom: Node): void {
   oldDom.parentNode?.replaceChild(newDom, oldDom);
 }
 
-export { setProp } from "./dom-set-prop.ts";
-export { removeProp, setText } from "./dom-remove-prop.ts";
+export { setProp } from "./set-prop.ts";
+export { removeProp, setText } from "./remove-prop.ts";

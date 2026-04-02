@@ -14,6 +14,18 @@ export function normalizeEventName(propName: string): string {
   return propName.slice(EVENT_PREFIX_LENGTH).toLowerCase();
 }
 
+export function normalizeAriaName(name: string): string {
+  return "aria" + name.slice(5, 6).toUpperCase() + name.slice(6);
+}
+
+export function assertIsNotEventProp(name: string): void {
+  if (isEventProp(name)) {
+    throw new Error(
+      `Cannot use setProp/removeProp on event prop "${name}". Use setEventHandler instead.`,
+    );
+  }
+}
+
 type EventListener = (...args: unknown[]) => void;
 
 export function addEventListener(
