@@ -4,19 +4,24 @@
  */
 
 import {
+  type ElementVNode,
+  type FragmentVNode,
   isElementVNode,
   isFragmentVNode,
   isTextVNode,
+  type TextVNode,
   type VNode,
 } from "jsr:@ggpwnkthx/jsx@0.1.8";
-import { createDom, removeProp, replaceNode, setProp, setText } from "./dom.ts";
-import { isEventProp, setEventHandler } from "./events.ts";
+import { createDom, replaceNode } from "./dom.ts";
 import { isVNode, removeDomRef, setDomRef } from "./types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
+import { patchText } from "./patch-text.ts";
+import { patchProps } from "./patch-props.ts";
+import { diffChildren, type PatchFn } from "./diff-children.ts";
 
 const MAX_PATCH_DEPTH = 1000;
 
-export function patch(
+function patch(
   oldVNode: VNode,
   newVNode: VNode,
   domNode: Node,
@@ -59,11 +64,7 @@ export function patch(
         `Expected Text node but got ${domNode.nodeName}. VNode kind: text`,
       );
     }
-    return patchText(
-      oldVNode as { type: string },
-      newVNode as { type: string },
-      domNode as Text,
-    );
+    return patchText(oldVNode as TextVNode, newVNode as TextVNode, domNode as Text);
   }
   if (isElementVNode(newVNode)) {
     if (domNode.nodeType !== Node.ELEMENT_NODE) {
@@ -72,8 +73,9 @@ export function patch(
       );
     }
     return patchElement(
-      oldVNode as { type: string; props: Record<string, unknown> | null },
-      newVNode as { type: string; props: Record<string, unknown> | null },
+      patch,
+      oldVNode as ElementVNode,
+      newVNode as ElementVNode,
       domNode as Element,
       parentDom,
       depth + 1,
@@ -81,8 +83,9 @@ export function patch(
   }
   if (isFragmentVNode(newVNode)) {
     return patchFragment(
-      oldVNode as { children?: readonly unknown[] },
-      newVNode as { children?: readonly unknown[] },
+      patch,
+      oldVNode as FragmentVNode,
+      newVNode as FragmentVNode,
       domNode,
       parentDom,
       depth + 1,
@@ -91,157 +94,43 @@ export function patch(
   return domNode;
 }
 
-function patchText(
-  oldVNode: { type: string },
-  newVNode: { type: string },
-  domNode: Text,
-): Text {
-  if (oldVNode.type !== newVNode.type) {
-    setText(domNode, newVNode.type);
-  }
-  return domNode;
-}
-
 function patchElement(
-  oldVNode: {
-    type: string;
-    props: Record<string, unknown> | null;
-    children?: readonly unknown[];
-  },
-  newVNode: {
-    type: string;
-    props: Record<string, unknown> | null;
-    children?: readonly unknown[];
-  },
+  patch: PatchFn,
+  oldVNode: ElementVNode,
+  newVNode: ElementVNode,
   domNode: Element,
-  // Reserved for future use (e.g., keyed move optimization)
   _parentDom: ParentNode,
   depth: number,
 ): Element {
+  // Reserved for future use: keyed element reordering
   if (oldVNode.type !== newVNode.type) {
-    const newDom = createDom(newVNode as VNode);
+    const newDom = createDom(newVNode);
     replaceNode(domNode, newDom);
-    setDomRef(newVNode as VNode, newDom);
-    removeDomRef(oldVNode as VNode);
+    setDomRef(newVNode, newDom);
+    removeDomRef(oldVNode);
     return newDom as Element;
   }
   patchProps(domNode, oldVNode.props ?? {}, newVNode.props ?? {});
-  patchChildren(domNode, oldVNode.children ?? [], newVNode.children ?? [], depth);
+  diffChildren(patch, domNode, oldVNode.children ?? [], newVNode.children ?? [], depth);
   return domNode;
 }
 
-function patchChildren(
-  domNode: Element,
-  oldChildren: readonly unknown[],
-  newChildren: readonly unknown[],
-  depth: number,
-): void {
-  const existingDomChildren = Array.from(domNode.childNodes);
-  const maxLength = Math.max(oldChildren.length, newChildren.length);
-  for (let i = 0; i < maxLength; i++) {
-    const oldChild = oldChildren[i];
-    const newChild = newChildren[i];
-    if (i < existingDomChildren.length) {
-      const existingDom = existingDomChildren[i];
-      if (newChild === null || newChild === undefined) {
-        if (oldChild !== null && oldChild !== undefined) {
-          removeDomRef(oldChild as VNode);
-        }
-        domNode.removeChild(existingDom);
-      } else if (oldChild === null || oldChild === undefined) {
-        const newDom = createDom(newChild as VNode);
-        domNode.insertBefore(newDom, existingDom);
-        setDomRef(newChild as VNode, newDom);
-      } else {
-        // Note: depth increments here (+1) and again at patch() entry, so each
-        // child level counts as ~2 against MAX_PATCH_DEPTH. This is conservative.
-        patch(
-          oldChild as VNode,
-          newChild as VNode,
-          existingDom,
-          domNode,
-          depth + 1,
-        );
-      }
-    } else if (newChild !== null && newChild !== undefined) {
-      const newDom = createDom(newChild as VNode);
-      domNode.appendChild(newDom);
-      setDomRef(newChild as VNode, newDom);
-    }
-  }
-}
-
-function patchProps(
-  el: Element,
-  oldProps: Record<string, unknown>,
-  newProps: Record<string, unknown>,
-): void {
-  const allKeys = new Set([...Object.keys(oldProps), ...Object.keys(newProps)]);
-  for (const key of allKeys) {
-    if (key === "children") continue;
-    const oldValue = oldProps[key];
-    const newValue = newProps[key];
-    if (oldValue === newValue) continue;
-    if (isEventProp(key)) {
-      setEventHandler(
-        el,
-        key,
-        newValue as (...args: unknown[]) => void,
-        oldValue as (...args: unknown[]) => void,
-      );
-    } else if (newValue === null || newValue === undefined) {
-      removeProp(el, key, oldValue);
-    } else {
-      setProp(el, key, newValue);
-    }
-  }
-}
-
 function patchFragment(
-  oldVNode: { children?: readonly unknown[] },
-  newVNode: { children?: readonly unknown[] },
+  patch: PatchFn,
+  oldVNode: FragmentVNode,
+  newVNode: FragmentVNode,
   domNode: Node,
-  // Reserved for future use (e.g., keyed move optimization)
   _parentDom: ParentNode,
   depth: number,
 ): Node {
+  // Reserved for future use: keyed fragment reordering
   if (domNode.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
     throw new InvariantError(
       `Expected DocumentFragment node but got ${domNode.nodeName}. VNode kind: fragment`,
     );
   }
-  const oldChildren = oldVNode.children ?? [];
-  const newChildren = newVNode.children ?? [];
-  const domChildren = Array.from(domNode.childNodes);
-  const maxLength = Math.max(oldChildren.length, newChildren.length);
-  for (let i = 0; i < maxLength; i++) {
-    const oldChild = oldChildren[i];
-    const newChild = newChildren[i];
-    if (i < domChildren.length) {
-      const existingDom = domChildren[i];
-      if (newChild === null || newChild === undefined) {
-        if (oldChild !== null && oldChild !== undefined) {
-          removeDomRef(oldChild as VNode);
-        }
-        domNode.removeChild(existingDom);
-      } else if (oldChild === null || oldChild === undefined) {
-        const newDom = createDom(newChild as VNode);
-        domNode.insertBefore(newDom, existingDom);
-        setDomRef(newChild as VNode, newDom);
-      } else {
-        patch(
-          oldChild as VNode,
-          newChild as VNode,
-          existingDom,
-          domNode as ParentNode,
-          depth + 1,
-        );
-      }
-    } else if (newChild !== null && newChild !== undefined) {
-      const newDom = createDom(newChild as VNode);
-      domNode.appendChild(newDom);
-      setDomRef(newChild as VNode, newDom);
-    }
-  }
+  diffChildren(patch, domNode, oldVNode.children ?? [], newVNode.children ?? [], depth);
   return domNode;
 }
+
+export { patch };

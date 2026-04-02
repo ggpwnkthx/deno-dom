@@ -18,6 +18,7 @@ export interface SchedulerDiagnostics {
   readonly flushCount: number;
   readonly nestedFlushCount: number;
   readonly loopGuardTriggers: number;
+  readonly flushScheduled: boolean;
 }
 
 export type LoopGuardResult =

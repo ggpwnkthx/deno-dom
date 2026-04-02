@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.4] - 2026-04-02
+
+### Changed
+
+- `@ggpwnkthx/dom-runtime`: Refactored large source files into focused modules for maintainability
+  - `src/dom.ts`: Split into `dom-set-prop.ts` (setProp), `dom-remove-prop.ts` (removeProp, setText)
+  - `src/patch.ts`: Split into `patch-text.ts` (patchText), `patch-props.ts` (patchProps), `patch-fragment.ts` (patchFragment), `diff-children.ts` (diffChildren, PatchFn type)
+  - `src/patch.ts` reduced from 247 to 136 lines; all new files under 140 lines
+- `@ggpwnkthx/dom-scheduler`: Refactored scheduler instance into standalone module
+  - `src/scheduler.ts`: Split into `scheduler-instance.ts` (createSchedulerInstance) and `scheduler-global.ts` (global singleton); `src/id.ts` extracted for ID generation
+  - Fixed `flushScheduled` deduplication bug: microtask now correctly sets flag before scheduling and resets after flush
+  - Added `flushScheduled` to `SchedulerDiagnostics` for debugging
+  - Removed dead `flushCount` local variable from scheduler instance
+
+### Fixed
+
+- `@ggpwnkthx/dom-runtime`: Runtime validation that event handler props are callable functions before passing to setEventHandler
+- `@ggpwnkthx/dom-scheduler`: `flushScheduled` deduplication gate now functional — multiple queueUpdate calls before microtask runs are now correctly deduplicated
+
+### Added
+
+- `@ggpwnkthx/dom-runtime`: `PatchFn` type exported from `diff-children.ts` for external consumers
+- `@ggpwnkthx/dom-runtime`: `removeProp` signature simplified — dead `_oldValue` parameter removed
+
 ## [0.0.1-rc.3] - 2026-04-02
 
 ### Added
