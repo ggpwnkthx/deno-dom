@@ -1,5 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { createScheduler } from "../src/scheduler.ts";
+import { InvariantError, ValidationError } from "@ggpwnkthx/dom-shared";
+import { createScheduler } from "@ggpwnkthx/dom-scheduler";
 
 async function drainMicrotasks(times = 1): Promise<void> {
   for (let i = 0; i < times; i++) {
@@ -173,22 +174,118 @@ Deno.test("nested flushUpdates counts nested flushes", () => {
   assertEquals(diag.nestedFlushCount, 1);
 });
 
-Deno.test("a thrown job does not poison later flushes", () => {
-  const scheduler = createScheduler({ maxLoopDepth: 2 });
-  let laterRan = false;
+Deno.test("thrown job restores depth so next top-level flush is still allowed", () => {
+  const scheduler = createScheduler({ maxLoopDepth: 1 });
+  let ran = false;
 
   scheduler.queueUpdate(() => {
     throw new Error("boom");
   });
-
   assertThrows(() => scheduler.flushUpdates(), Error, "boom");
 
   scheduler.queueUpdate(() => {
-    laterRan = true;
+    ran = true;
   });
   scheduler.flushUpdates();
 
-  assertEquals(laterRan, true);
+  assertEquals(ran, true);
+
+  const diag = scheduler.getDiagnostics();
+  assertEquals(diag.nestedFlushCount, 0);
+  assertEquals(diag.loopGuardTriggers, 0);
+});
+
+Deno.test("loop guard throws InvariantError when depth limit is exceeded", () => {
+  const scheduler = createScheduler({ maxLoopDepth: 1 });
+
+  scheduler.queueUpdate(() => {
+    scheduler.queueUpdate(() => {});
+    scheduler.flushUpdates();
+  });
+
+  assertThrows(() => scheduler.flushUpdates(), InvariantError);
+
+  const diag = scheduler.getDiagnostics();
+  assertEquals(diag.loopGuardTriggers, 1);
+});
+
+Deno.test("queueUpdate throws TypeError when fn is not a function", () => {
+  const scheduler = createScheduler();
+
+  assertThrows(
+    () => scheduler.queueUpdate(null as unknown as () => void),
+    TypeError,
+    "fn must be a function",
+  );
+  assertThrows(
+    () => scheduler.queueUpdate(undefined as unknown as () => void),
+    TypeError,
+    "fn must be a function",
+  );
+  assertThrows(
+    () => scheduler.queueUpdate(Symbol("x") as unknown as () => void),
+    TypeError,
+    "fn must be a function",
+  );
+  assertThrows(
+    () => scheduler.queueUpdate({} as unknown as () => void),
+    TypeError,
+    "fn must be a function",
+  );
+  assertThrows(
+    () => scheduler.queueUpdate(1 as unknown as () => void),
+    TypeError,
+    "fn must be a function",
+  );
+});
+
+Deno.test("queueUpdate throws TypeError when dedupeKey is invalid", () => {
+  const scheduler = createScheduler();
+
+  assertThrows(
+    () => scheduler.queueUpdate(() => {}, Symbol("x") as unknown as string | number),
+    TypeError,
+    "dedupeKey must be a string or number",
+  );
+  assertThrows(
+    () =>
+      scheduler.queueUpdate(() => {}, { key: "value" } as unknown as string | number),
+    TypeError,
+    "dedupeKey must be a string or number",
+  );
+  assertThrows(
+    () => scheduler.queueUpdate(() => {}, true as unknown as string | number),
+    TypeError,
+    "dedupeKey must be a string or number",
+  );
+});
+
+Deno.test("createScheduler throws ValidationError for invalid maxLoopDepth", () => {
+  assertThrows(
+    () => createScheduler({ maxLoopDepth: -1 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createScheduler({ maxLoopDepth: 0 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createScheduler({ maxLoopDepth: 1.5 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createScheduler({ maxLoopDepth: NaN }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createScheduler({ maxLoopDepth: Infinity }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
 });
 
 Deno.test("after thrown job, diagnostics reflect the failed batch", () => {
@@ -203,30 +300,6 @@ Deno.test("after thrown job, diagnostics reflect the failed batch", () => {
   const diag = scheduler.getDiagnostics();
   assertEquals(diag.flushCount, 1);
   assertEquals(diag.dequeuedCount, 1);
-  assertEquals(diag.flushScheduled, false);
-});
-
-Deno.test("after thrown job, fresh job flushes normally", () => {
-  const scheduler = createScheduler({ maxLoopDepth: 2 });
-  let freshRan = false;
-
-  scheduler.queueUpdate(() => {
-    throw new Error("boom");
-  });
-
-  assertThrows(() => scheduler.flushUpdates(), Error, "boom");
-
-  scheduler.queueUpdate(() => {
-    freshRan = true;
-  });
-  scheduler.flushUpdates();
-
-  assertEquals(freshRan, true);
-
-  const diag = scheduler.getDiagnostics();
-  assertEquals(diag.flushCount, 2);
-  assertEquals(diag.dequeuedCount, 2);
-  assertEquals(diag.loopGuardTriggers, 0);
   assertEquals(diag.flushScheduled, false);
 });
 

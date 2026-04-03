@@ -1,5 +1,6 @@
-import { assertEquals } from "@std/assert";
-import { createLoopGuard } from "../src/guards.ts";
+import { assertEquals, assertThrows } from "@std/assert";
+import { ValidationError } from "@ggpwnkthx/dom-shared";
+import { createLoopGuard } from "@ggpwnkthx/dom-scheduler";
 
 Deno.test("recordDepth increments depth and counts nested flushes", () => {
   const guard = createLoopGuard({ maxLoopDepth: 10 });
@@ -31,7 +32,7 @@ Deno.test("restoreDepth sets depth to the previous value", () => {
   assertEquals(result.allowed, true);
 });
 
-Deno.test("checkReentrancy allows flushes at and below max depth", () => {
+Deno.test("checkReentrancy allows below max depth and rejects when next flush would exceed the limit", () => {
   const guard = createLoopGuard({ maxLoopDepth: 3 });
 
   guard.recordDepth();
@@ -103,6 +104,39 @@ Deno.test("default maxLoopDepth is 100", () => {
   guard.restoreDepth(0);
 });
 
+Deno.test("createLoopGuard throws ValidationError for invalid maxLoopDepth", () => {
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: -1 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: 0 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: 1.5 }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: NaN }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: null as unknown as number }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+  assertThrows(
+    () => createLoopGuard({ maxLoopDepth: Infinity }),
+    ValidationError,
+    "maxLoopDepth must be a positive integer",
+  );
+});
+
 Deno.test("reset clears all state", () => {
   const guard = createLoopGuard({ maxLoopDepth: 5 });
 
@@ -133,18 +167,6 @@ Deno.test("nested flushes below limit leave diagnostics coherent", () => {
   const diag2 = guard.getDiagnostics();
   assertEquals(diag2.nestedFlushCount, 1);
   assertEquals(diag2.loopGuardTriggers, 0);
-
-  guard.restoreDepth(0);
-});
-
-Deno.test("loop guard rejects at depth === maxDepth", () => {
-  const guard = createLoopGuard({ maxLoopDepth: 2 });
-
-  guard.recordDepth();
-  guard.recordDepth();
-
-  const result = guard.checkReentrancy();
-  assertEquals(result.allowed, false);
 
   guard.restoreDepth(0);
 });

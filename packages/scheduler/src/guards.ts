@@ -1,3 +1,4 @@
+import { ValidationError } from "@ggpwnkthx/dom-shared";
 import type {
   LoopGuardResult,
   SchedulerConfig,
@@ -18,6 +19,16 @@ export interface LoopGuard {
 const DEFAULT_MAX_LOOP_DEPTH = 100;
 
 export function createLoopGuard(config: SchedulerConfig = {}): LoopGuard {
+  if (
+    config.maxLoopDepth !== undefined
+    && (typeof config.maxLoopDepth !== "number"
+      || !Number.isInteger(config.maxLoopDepth) || config.maxLoopDepth < 1)
+  ) {
+    throw new ValidationError(
+      `maxLoopDepth must be a positive integer, got ${config.maxLoopDepth}`,
+      { name: "maxLoopDepth", value: config.maxLoopDepth },
+    );
+  }
   let depth = 0;
   let nestedFlushCount = 0;
   let loopGuardTriggers = 0;

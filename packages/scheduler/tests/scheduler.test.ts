@@ -6,7 +6,7 @@ import {
   queueUpdate,
   resetScheduler,
   schedule,
-} from "../src/mod.ts";
+} from "@ggpwnkthx/dom-scheduler";
 
 Deno.test("schedule is an alias for queueUpdate", () => {
   const scheduler = createScheduler();

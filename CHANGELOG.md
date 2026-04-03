@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.10] - 2026-04-03
+
+### Fixed
+
+- `@ggpwnkthx/dom-scheduler`: `doFlush()` now uses `try/finally` to guarantee depth restoration when a job throws — prevents dirty loop guard state that silently corrupts subsequent flushes
+- `@ggpwnkthx/dom-scheduler`: Removed duplicate loop guard boundary test; renamed remaining boundary test to accurately reflect the `checkReentrancy` behavior
+
+### Added
+
+- `@ggpwnkthx/dom-scheduler`: `queueUpdate()` validates `fn` is a function (`TypeError`) and `dedupeKey` is a string or number (`TypeError`) — `schedule` inherits validation as a true alias
+- `@ggpwnkthx/dom-scheduler`: `createLoopGuard()` validates `maxLoopDepth` is a positive integer (`ValidationError`) — rejects `-1`, `0`, non-integers, `NaN`, `Infinity`, and non-number types
+- `@ggpwnkthx/dom-scheduler`: `createScheduler()` (public API) also validates `maxLoopDepth` at the user-facing entry point
+- `@ggpwnkthx/dom-scheduler`: Strengthened thrown-job recovery test — uses `maxLoopDepth: 1` and asserts `nestedFlushCount === 0` after recovery, exposing the real failure mode
+- `@ggpwnkthx/dom-scheduler`: `InvariantError` boundary test for loop guard rejection — directly asserts the specific error type
+
+### Cleanup
+
+- `@ggpwnkthx/dom-scheduler`: Removed unused `internalDiagnostics.nestedFlushCount` and `loopGuardTriggers` fields — diagnostics now sourced exclusively from `loopGuard.getDiagnostics()`
+
+### Documentation
+
+- `@ggpwnkthx/dom-scheduler`: Added `flushSync` comment documenting intentional exception propagation
+- `@ggpwnkthx/dom-scheduler`: Added `flushScheduled` comment explaining its deduplication semantics
+- `@ggpwnkthx/dom-scheduler`: Added `currentDepth` comment explaining its relationship to `loopGuard`
+
 ## [0.0.1-rc.9] - 2026-04-03
 
 ### Tests

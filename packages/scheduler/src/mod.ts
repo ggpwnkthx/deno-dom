@@ -3,16 +3,8 @@
  * @module
  */
 
-export {
-  createScheduler,
-  flushUpdates,
-  getDiagnostics,
-  queueUpdate,
-  resetScheduler,
-  schedule,
-} from "./scheduler.ts";
-
-export type { Scheduler, SchedulerConfig, SchedulerDiagnostics } from "./types.ts";
-export type { LoopGuardResult } from "./types.ts";
-export type { Queue, QueueDiagnostics } from "./queue.ts";
-export type { LoopGuard } from "./guards.ts";
+export * from "./scheduler.ts";
+export * from "./types.ts";
+export * from "./queue.ts";
+export * from "./guards.ts";
+export * from "./id.ts";

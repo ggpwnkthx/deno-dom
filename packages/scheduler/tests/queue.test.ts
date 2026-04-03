@@ -1,7 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { createQueue } from "../src/queue.ts";
-import { nextId } from "../src/id.ts";
-import type { UpdateJob } from "../src/types.ts";
+import { createQueue, nextId, type UpdateJob } from "@ggpwnkthx/dom-scheduler";
 
 function makeJob(id?: string, dedupeKey?: string | number): UpdateJob {
   return { id: id ?? nextId(), dedupeKey, fn: () => {} };
