@@ -2,8 +2,7 @@ import { assertEquals } from "@std/assert";
 import { Node } from "@b-fuze/deno-dom";
 import { createElementVNode, createTextVNode } from "@ggpwnkthx/jsx";
 import { getDomRef } from "@ggpwnkthx/dom-runtime";
-import { hydrate } from "../src/hydrate.ts";
-import type { MismatchInfo } from "../src/types.ts";
+import { hydrate, type MismatchInfo } from "@ggpwnkthx/dom-hydrate";
 import { env } from "./test-environment.ts";
 
 Deno.test("hydrate decision: replaces only the mismatched child subtree", () => {

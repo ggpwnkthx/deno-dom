@@ -1,6 +1,6 @@
 import { assertThrows } from "@std/assert";
 import { createElementVNode, type VNode } from "@ggpwnkthx/jsx";
-import { hydrate } from "../src/hydrate.ts";
+import { hydrate } from "@ggpwnkthx/dom-hydrate";
 import { env } from "./test-environment.ts";
 
 Deno.test("hydrate decision: throws descriptive error for non-VNode children", () => {
