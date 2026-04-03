@@ -66,7 +66,8 @@ SSR output: `<div data-hk="0">child1contentchild2content</div>`
 
 After successful hydration:
 
-- All vnodes have `dom` references attached via `setDomRef()`
+- All concrete DOM-producing vnodes (element, text) have `dom` references attached via `setDomRef()`
+- Fragment vnodes do not have a single-node `dom` reference (use child refs for traversal)
 - Event handlers are rebound (not re-created)
 - Extra DOM nodes are removed during hydration
 - Tree is ready for patch-based updates via `@ggpwnkthx/dom-runtime`

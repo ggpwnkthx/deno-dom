@@ -12,7 +12,13 @@ import {
   InvariantError,
   parseHydrationPath,
 } from "@ggpwnkthx/dom-shared";
-import { createDom, setDomRef, setEventHandler, setProp } from "@ggpwnkthx/dom-runtime";
+import {
+  createDom,
+  removeProp,
+  setDomRef,
+  setEventHandler,
+  setProp,
+} from "@ggpwnkthx/dom-runtime";
 import { warnMismatch } from "./diagnostics.ts";
 import type { MismatchInfo } from "./types.ts";
 import {
@@ -28,6 +34,7 @@ import {
 } from "@ggpwnkthx/jsx";
 
 const MAX_HYDRATE_DEPTH = 1000;
+const HYDRATION_MARKER = "data-hk";
 
 export interface HydrateOptions {
   onMismatch?: (info: MismatchInfo) => void;
@@ -46,13 +53,19 @@ export function hydrate(
   const rootDom = container.firstElementChild;
 
   if (!rootDom) {
-    const dom = createDom(vnode);
+    const dom = createDomDeep(vnode, 0);
     container.appendChild(dom);
-    setDomRef(vnode, dom);
+    if (!isFragmentVNode(vnode)) {
+      setDomRef(vnode, dom);
+    }
     return vnode;
   }
 
-  hydrateElement(vnode, rootDom as Element, rootPath, options, 0);
+  if (isFragmentVNode(vnode)) {
+    hydrateFragmentRoot(vnode, container, options);
+  } else {
+    hydrateElement(vnode, rootDom as Element, rootPath, options, 0);
+  }
 
   return vnode;
 }
@@ -101,6 +114,7 @@ function hydrateTextNode(
       vnode,
       domNode: textNode ?? null,
       expectedPath: path,
+      actualPath: undefined,
     };
     options?.onMismatch?.(mismatch);
     warnMismatch(mismatch);
@@ -146,6 +160,7 @@ function hydrateElementNode(
       vnode,
       domNode: el,
       expectedPath: path,
+      actualPath: undefined,
     };
     options?.onMismatch?.(mismatch);
     warnMismatch(mismatch);
@@ -167,7 +182,6 @@ function hydrateFragmentNode(
   options: HydrateOptions | undefined,
   depth: number,
 ): void {
-  setDomRef(vnode, el);
   hydrateChildren(vnode.children, el, path, options, depth + 1);
 }
 
@@ -176,6 +190,227 @@ function hydrateComponentNode(
   el: Element,
 ): void {
   setDomRef(vnode, el);
+}
+
+function hydrateFragmentRoot(
+  vnode: FragmentVNode,
+  container: ParentNode,
+  options: HydrateOptions | undefined,
+): void {
+  const fragmentChildren = (vnode as VNode & { children?: unknown[] }).children;
+  if (!fragmentChildren) return;
+
+  const childArray = Array.isArray(fragmentChildren)
+    ? fragmentChildren
+    : [fragmentChildren];
+
+  let elementIndex = 0;
+  let domIndex = 0;
+
+  for (const child of childArray) {
+    if (child === null || child === undefined) continue;
+
+    if (!isVNode(child)) {
+      throw new InvariantError(
+        `hydrateFragmentRoot encountered non-VNode child: ${typeof child}`,
+      );
+    }
+
+    const childVNode = child as VNode;
+
+    if (isTextVNode(childVNode)) {
+      const domNode = container.childNodes[domIndex];
+      if (domNode?.nodeType === Node.TEXT_NODE) {
+        if (domNode.textContent !== childVNode.type) {
+          domNode.textContent = childVNode.type;
+        }
+        setDomRef(childVNode, domNode);
+        domIndex++;
+      } else {
+        const mismatch: MismatchInfo = {
+          kind: "type-mismatch",
+          vnode: childVNode,
+          domNode: domNode ?? null,
+          expectedPath: String(elementIndex) as HydrationPath,
+          actualPath: undefined,
+        };
+        options?.onMismatch?.(mismatch);
+        warnMismatch(mismatch);
+        const textDom = createDom(childVNode);
+        if (domNode && domNode.parentNode === container) {
+          container.replaceChild(textDom, domNode);
+        } else {
+          container.appendChild(textDom);
+        }
+        setDomRef(childVNode, textDom);
+        domIndex++;
+      }
+      continue;
+    }
+
+    if (isFragmentVNode(childVNode)) {
+      const nestedChildren = (childVNode as VNode & { children?: unknown[] }).children;
+      const nestedResult = hydrateNestedFragmentChildren(
+        nestedChildren,
+        container,
+        elementIndex,
+        domIndex,
+        options,
+      );
+      elementIndex += nestedResult.elementCount;
+      domIndex = nestedResult.domIndex;
+      continue;
+    }
+
+    const expectedPath = String(elementIndex) as HydrationPath;
+
+    let domNode = container.childNodes[domIndex];
+    while (domNode && domNode.nodeType !== Node.ELEMENT_NODE) {
+      domIndex++;
+      domNode = container.childNodes[domIndex];
+    }
+
+    if (!domNode) {
+      const mismatch: MismatchInfo = {
+        kind: "missing-child",
+        vnode: childVNode,
+        domNode: null,
+        expectedPath,
+        actualPath: undefined,
+      };
+      options?.onMismatch?.(mismatch);
+      warnMismatch(mismatch);
+      const newDom = createDomDeep(childVNode, 0);
+      container.appendChild(newDom);
+      setDomRef(childVNode, newDom);
+      elementIndex++;
+      domIndex++;
+      continue;
+    }
+
+    hydrateElement(
+      childVNode,
+      domNode as Element,
+      expectedPath,
+      options,
+      0,
+    );
+
+    elementIndex++;
+    domIndex++;
+  }
+
+  detectExtraChildren(container as Element, domIndex, "" as HydrationPath, options);
+}
+
+function hydrateNestedFragmentChildren(
+  children: unknown,
+  container: ParentNode,
+  startElementIndex: number,
+  startDomIndex: number,
+  options: HydrateOptions | undefined,
+): { elementCount: number; domIndex: number } {
+  if (!children) return { elementCount: 0, domIndex: startDomIndex };
+
+  const childArray = Array.isArray(children) ? children : [children];
+
+  let elementIndex = startElementIndex;
+  let domIndex = startDomIndex;
+
+  for (const child of childArray) {
+    if (child === null || child === undefined) continue;
+
+    if (!isVNode(child)) {
+      throw new InvariantError(
+        `hydrateNestedFragmentChildren encountered non-VNode child: ${typeof child}`,
+      );
+    }
+
+    const childVNode = child as VNode;
+
+    if (isTextVNode(childVNode)) {
+      const domNode = container.childNodes[domIndex];
+      if (domNode?.nodeType === Node.TEXT_NODE) {
+        if (domNode.textContent !== childVNode.type) {
+          domNode.textContent = childVNode.type;
+        }
+        setDomRef(childVNode, domNode);
+        domIndex++;
+      } else {
+        const mismatch: MismatchInfo = {
+          kind: "type-mismatch",
+          vnode: childVNode,
+          domNode: domNode ?? null,
+          expectedPath: String(elementIndex) as HydrationPath,
+          actualPath: undefined,
+        };
+        options?.onMismatch?.(mismatch);
+        warnMismatch(mismatch);
+        const textDom = createDom(childVNode);
+        if (domNode && domNode.parentNode === container) {
+          container.replaceChild(textDom, domNode);
+        } else {
+          container.appendChild(textDom);
+        }
+        setDomRef(childVNode, textDom);
+        domIndex++;
+      }
+      continue;
+    }
+
+    if (isFragmentVNode(childVNode)) {
+      const nestedChildren = (childVNode as VNode & { children?: unknown[] }).children;
+      const nestedResult = hydrateNestedFragmentChildren(
+        nestedChildren,
+        container,
+        elementIndex,
+        domIndex,
+        options,
+      );
+      elementIndex += nestedResult.elementCount;
+      domIndex = nestedResult.domIndex;
+      continue;
+    }
+
+    const expectedPath = String(elementIndex) as HydrationPath;
+
+    let domNode = container.childNodes[domIndex];
+    while (domNode && domNode.nodeType !== Node.ELEMENT_NODE) {
+      domIndex++;
+      domNode = container.childNodes[domIndex];
+    }
+
+    if (!domNode) {
+      const mismatch: MismatchInfo = {
+        kind: "missing-child",
+        vnode: childVNode,
+        domNode: null,
+        expectedPath,
+        actualPath: undefined,
+      };
+      options?.onMismatch?.(mismatch);
+      warnMismatch(mismatch);
+      const newDom = createDomDeep(childVNode, 0);
+      container.appendChild(newDom);
+      setDomRef(childVNode, newDom);
+      elementIndex++;
+      domIndex++;
+      continue;
+    }
+
+    hydrateElement(
+      childVNode,
+      domNode as Element,
+      expectedPath,
+      options,
+      0,
+    );
+
+    elementIndex++;
+    domIndex++;
+  }
+
+  return { elementCount: elementIndex - startElementIndex, domIndex };
 }
 
 function hydrateChildren(
@@ -205,9 +440,9 @@ function hydrateChildrenInternal(
   depth: number,
   startElementIndex = 0,
   startDomIndex = 0,
-): { elementIndex: number; domIndex: number } {
+): { elementCount: number; domIndex: number } {
   if (children === null || children === undefined) {
-    return { elementIndex: startElementIndex, domIndex: startDomIndex };
+    return { elementCount: 0, domIndex: startDomIndex };
   }
 
   const childArray = Array.isArray(children) ? children : [children];
@@ -217,6 +452,12 @@ function hydrateChildrenInternal(
 
   for (const child of childArray) {
     if (child === null || child === undefined) continue;
+
+    if (!isVNode(child)) {
+      throw new InvariantError(
+        `hydrateChildrenInternal encountered non-VNode child at path ${parentPath}: ${typeof child}`,
+      );
+    }
 
     const childVNode = child as VNode;
 
@@ -234,6 +475,7 @@ function hydrateChildrenInternal(
           vnode: childVNode,
           domNode: domNode ?? null,
           expectedPath: parentPath,
+          actualPath: undefined,
         };
         options?.onMismatch?.(mismatch);
         warnMismatch(mismatch);
@@ -252,7 +494,6 @@ function hydrateChildrenInternal(
     if (isFragmentVNode(childVNode)) {
       const fragmentChildren =
         (childVNode as VNode & { children?: unknown[] }).children;
-      const elementCount = countFragmentElements(fragmentChildren);
       const fragmentResult = hydrateChildrenInternal(
         fragmentChildren,
         parentEl,
@@ -262,7 +503,7 @@ function hydrateChildrenInternal(
         elementIndex,
         domIndex,
       );
-      elementIndex += elementCount;
+      elementIndex += fragmentResult.elementCount;
       domIndex = fragmentResult.domIndex;
       continue;
     }
@@ -281,10 +522,11 @@ function hydrateChildrenInternal(
         vnode: childVNode,
         domNode: null,
         expectedPath: expectedPath,
+        actualPath: undefined,
       };
       options?.onMismatch?.(mismatch);
       warnMismatch(mismatch);
-      const newDom = createDom(childVNode);
+      const newDom = createDomDeep(childVNode, depth);
       parentEl.appendChild(newDom);
       setDomRef(childVNode, newDom);
       elementIndex++;
@@ -314,7 +556,7 @@ function hydrateChildrenInternal(
     domIndex++;
   }
 
-  return { elementIndex, domIndex };
+  return { elementCount: elementIndex - startElementIndex, domIndex };
 }
 
 function detectExtraChildren(
@@ -348,6 +590,7 @@ function detectExtraChildren(
         vnode: null,
         domNode,
         expectedPath: parentPath,
+        actualPath: undefined,
       };
       options?.onMismatch?.(mismatch);
       warnMismatch(mismatch);
@@ -361,6 +604,15 @@ function detectExtraChildren(
 
 function applyProps(el: Element, props: Record<string, unknown>): void {
   if (!props) return;
+
+  const propKeys = new Set(Object.keys(props));
+  for (let i = 0; i < el.attributes.length; i++) {
+    const attr = el.attributes[i];
+    if (!propKeys.has(attr.name) && attr.name !== HYDRATION_MARKER) {
+      removeProp(el, attr.name);
+      i--;
+    }
+  }
 
   for (const [key, value] of Object.entries(props)) {
     if (key === "children") continue;
@@ -378,7 +630,9 @@ function replaceWith(vnode: VNode, oldDom: Node): void {
     throw new InvariantError("replaceWith called on detached node");
   }
   oldDom.parentNode.replaceChild(newDom, oldDom);
-  setDomRef(vnode, newDom);
+  if (!isFragmentVNode(vnode)) {
+    setDomRef(vnode, newDom);
+  }
 }
 
 function createDomDeep(vnode: VNode, depth: number): Node {
@@ -415,7 +669,7 @@ function createDomDeep(vnode: VNode, depth: number): Node {
     );
   }
 
-  throw new InvariantError(`Unknown VNode kind: ${(vnode as VNode).kind}`);
+  return vnode as never; // exhaustive: all VNode kinds handled above
 }
 
 function appendChildren(
@@ -424,23 +678,15 @@ function appendChildren(
   depth: number,
 ): void {
   forEachChild(children, depth, (child: unknown) => {
-    const childDom = createDomDeep(child as VNode, depth + 1);
-    parent.appendChild(childDom);
-    setDomRef(child as VNode, childDom);
-  });
-}
-
-function countFragmentElements(children: unknown): number {
-  let count = 0;
-  forEachChild(children, 0, (child: unknown) => {
-    const vnode = child as VNode;
-    if (isElementVNode(vnode)) {
-      count++;
-    } else if (isFragmentVNode(vnode)) {
-      count += countFragmentElements(
-        (vnode as VNode & { children?: unknown[] }).children,
+    if (!isVNode(child)) {
+      throw new InvariantError(
+        `appendChildren encountered non-VNode child at depth ${depth}: ${typeof child}`,
       );
     }
+    const childDom = createDomDeep(child, depth + 1);
+    parent.appendChild(childDom);
+    if (!isFragmentVNode(child)) {
+      setDomRef(child, childDom);
+    }
   });
-  return count;
 }

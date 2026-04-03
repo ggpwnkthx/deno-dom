@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.8] - 2026-04-03
+
+### Added
+
+- `@ggpwnkthx/dom-runtime`: `removeProp` function exported for attribute removal
+- `@ggpwnkthx/dom-runtime`: `getDomRef` now returns `Node | null` (previously always returned Node)
+
+### Changed
+
+- `@ggpwnkthx/dom-hydrate`: Refactored fragment hydration with dedicated `hydrateFragmentRoot` and `hydrateNestedFragmentChildren` functions
+- `@ggpwnkthx/dom-hydrate`: `hydrateChildrenInternal` return type changed from `{ elementIndex, domIndex }` to `{ elementCount, domIndex }`
+- `@ggpwnkthx/dom-hydrate`: Added `HYDRATION_MARKER` constant for attribute comparison
+- `@ggpwnkthx/dom-hydrate`: Prop removal now removes attributes not present in vnode props (attribute cleanup)
+- `@ggpwnkthx/dom-hydrate`: `actualPath` added to mismatch info with `undefined` for vnode-related mismatches
+- `@ggpwnkthx/dom-hydrate`: `MismatchKind` split into `MismatchKindWithVNode` and `MismatchKindExtra` with corresponding `MismatchWithVNode` and `MismatchExtra` interfaces
+
+### Fixed
+
+- `@ggpwnkthx/dom-hydrate`: Fragment root hydration now properly walks all children including nested fragments and text nodes
+- `@ggpwnkthx/dom-hydrate`: `replaceWith` no longer sets dom ref for fragment vnodes
+- `@ggpwnkthx/dom-hydrate`: Removed `countFragmentElements` helper (replaced by proper element counting via hydration result)
+- `@ggpwnkthx/dom-hydrate`: Added validation that hydrate children are VNodes (throws `InvariantError` otherwise)
+
+### Tests
+
+- `@ggpwnkthx/dom-hydrate`: Reorganized test suite — deleted `hydrate.test.ts`, added focused test files: `basic-hydration.test.ts`, `comments.test.ts`, `error-handling.test.ts`, `extra-children.test.ts`, `fragments.test.ts`, `mismatch-handling.test.ts`, `missing-children.test.ts`, `test-environment.ts`, `text-nodes.test.ts`
+
 ## [0.0.1-rc.7] - 2026-04-03
 
 ### Added

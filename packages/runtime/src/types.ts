@@ -5,7 +5,7 @@
 
 import type { VNode } from "@ggpwnkthx/jsx";
 
-const domRefs = new WeakMap<VNode, Node>();
+const domRefs = new WeakMap<VNode, Node | null>();
 
 export function getDomRef(vnode: VNode): Node | null {
   return domRefs.get(vnode) ?? null;

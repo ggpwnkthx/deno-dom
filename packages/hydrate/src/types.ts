@@ -8,18 +8,30 @@
 import type { VNode } from "@ggpwnkthx/jsx";
 import type { HydrationPath } from "@ggpwnkthx/dom-shared";
 
-export type MismatchKind =
+export type MismatchKindWithVNode =
   | "tag-mismatch"
   | "marker-mismatch"
   | "type-mismatch"
-  | "missing-child"
-  | "extra-child"
-  | "extra-text";
+  | "missing-child";
 
-export interface MismatchInfo {
-  kind: MismatchKind;
-  vnode: VNode | null;
+export type MismatchKindExtra = "extra-child" | "extra-text";
+
+export type MismatchKind = MismatchKindWithVNode | MismatchKindExtra;
+
+export interface MismatchWithVNode {
+  kind: MismatchKindWithVNode;
+  vnode: VNode;
   domNode: Node | null;
   expectedPath: HydrationPath;
-  actualPath?: HydrationPath;
+  actualPath: HydrationPath | undefined;
 }
+
+export interface MismatchExtra {
+  kind: MismatchKindExtra;
+  vnode: null;
+  domNode: Node;
+  expectedPath: HydrationPath;
+  actualPath: HydrationPath | undefined;
+}
+
+export type MismatchInfo = MismatchWithVNode | MismatchExtra;
