@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.9] - 2026-04-03
+
+### Tests
+
+- `@ggpwnkthx/dom-scheduler`: Complete test suite rewrite — deleted single `scheduler.test.ts`, added four focused test files: `guards.test.ts` (loop guard bookkeeping and rejection), `queue.test.ts` (FIFO, dedupe, diagnostics), `instance.test.ts` (microtask batching, sync flush, generation/reset invalidation, thrown-job recovery), `scheduler.test.ts` (global facade smoke tests)
+- `@ggpwnkthx/dom-scheduler`: 47 tests total across 4 files, all using `createScheduler()` directly for instance tests to avoid singleton leakage
+
 ## [0.0.1-rc.8] - 2026-04-03
 
 ### Added
