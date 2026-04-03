@@ -14,9 +14,19 @@ import {
 import { createDom, setProp } from "./dom/mod.ts";
 import { isEventProp, setEventHandler } from "./events.ts";
 import { setDomRef } from "./types.ts";
-import { InvariantError } from "@ggpwnkthx/dom-shared";
+import { forEachChild, InvariantError } from "@ggpwnkthx/dom-shared";
 
 const MAX_MOUNT_DEPTH = 1000;
+
+function appendChild(
+  parent: Element | DocumentFragment,
+  child: unknown,
+  depth: number,
+): void {
+  const childDom = createDomWithChildren(child as VNode, depth + 1);
+  parent.appendChild(childDom);
+  setDomRef(child as VNode, childDom);
+}
 
 export function mount(vnode: VNode, container: ParentNode): void {
   if (!isVNode(vnode)) {
@@ -44,41 +54,34 @@ function createDomWithChildren(vnode: VNode, depth: number): Node {
     return dom;
   }
   if (isElementVNode(vnode)) {
-    const dom = createDom(vnode);
+    const el = createDom(vnode) as Element;
     if (vnode.props) {
       for (const [key, value] of Object.entries(vnode.props)) {
         if (key === "children") continue;
         if (isEventProp(key)) {
-          setEventHandler(dom as Element, key, value as (...args: unknown[]) => void);
+          setEventHandler(el, key, value as (...args: unknown[]) => void);
         } else {
-          setProp(dom as Element, key, value);
+          setProp(el, key, value);
         }
       }
     }
     if (vnode.props?.children) {
-      const children = vnode.props.children;
-      const childArray = Array.isArray(children) ? children : [children];
-      for (const child of childArray) {
-        if (child === null || child === undefined) continue;
-        const childDom = createDomWithChildren(child as VNode, depth + 1);
-        dom.appendChild(childDom);
-        setDomRef(child as VNode, childDom);
-      }
+      forEachChild(vnode.props.children, depth, (child: unknown) => {
+        appendChild(el, child, depth);
+      });
+    } else if (vnode.children) {
+      forEachChild(vnode.children, depth, (child: unknown) => {
+        appendChild(el, child, depth);
+      });
     }
-    return dom;
+    return el;
   }
   if (isFragmentVNode(vnode)) {
     const fragment = document.createDocumentFragment();
     const fragmentVNode = vnode as FragmentVNode;
-    const children = fragmentVNode.children;
-    if (children) {
-      for (const child of children) {
-        if (child === null || child === undefined) continue;
-        const childDom = createDomWithChildren(child as VNode, depth + 1);
-        fragment.appendChild(childDom);
-        setDomRef(child as VNode, childDom);
-      }
-    }
+    forEachChild(fragmentVNode.children, depth, (child: unknown) => {
+      appendChild(fragment, child, depth);
+    });
     return fragment;
   }
   const dom = createDom(vnode);

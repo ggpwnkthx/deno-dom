@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert@1.0.19";
+import { assertEquals } from "@std/assert";
 
 Deno.test("smoke: root facade imports without resolution failure", async () => {
   const mod = await import("../src/mod.ts");

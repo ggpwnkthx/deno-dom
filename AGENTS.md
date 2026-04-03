@@ -61,7 +61,7 @@ Required permissions vary by functionality. Document all `--allow-*` flags used:
 - Use jsr.io packages only; never `https://deno.land` imports
 - Pin versions: `import { X } from "jsr:@scope/pkg@1.2.3";`
 - Current deps:
-  - `@std/assert@1.0.19` for testing assertions
+  - `@std/assert` for testing assertions
 - Sort imports: external → internal → relative
 
 ### Formatting (from deno.jsonc)
@@ -200,7 +200,7 @@ Avoid types that cause performance overhead:
 ### Test Patterns
 
 ```typescript
-import { assertEquals, assertThrows } from "@std/assert@1.0.19";
+import { assertEquals, assertThrows } from "@std/assert";
 
 // Basic test
 Deno.test("myFeature works correctly", () => {

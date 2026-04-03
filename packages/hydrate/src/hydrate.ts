@@ -7,24 +7,24 @@
 
 import {
   buildHydrationPath,
+  forEachChild,
   type HydrationPath,
-  parseHydrationPath,
   InvariantError,
+  parseHydrationPath,
 } from "@ggpwnkthx/dom-shared";
-import {
-  createDom,
-  setDomRef,
-  setEventHandler,
-  setProp,
-} from "@ggpwnkthx/dom-runtime";
+import { createDom, setDomRef, setEventHandler, setProp } from "@ggpwnkthx/dom-runtime";
 import { warnMismatch } from "./diagnostics.ts";
 import type { MismatchInfo } from "./types.ts";
 import {
+  type ElementVNode,
+  type FragmentVNode,
+  isComponentVNode,
   isElementVNode,
   isFragmentVNode,
   isTextVNode,
   isVNode,
-  type VNode
+  type TextVNode,
+  type VNode,
 } from "@ggpwnkthx/jsx";
 
 const MAX_HYDRATE_DEPTH = 1000;
@@ -89,7 +89,7 @@ function hydrateElement(
 }
 
 function hydrateTextNode(
-  vnode: VNode & { type: string },
+  vnode: TextVNode,
   el: Element,
   path: HydrationPath,
   options: HydrateOptions | undefined,
@@ -110,11 +110,15 @@ function hydrateTextNode(
     return;
   }
 
+  if (textNode.textContent !== vnode.type) {
+    textNode.textContent = vnode.type;
+  }
+
   setDomRef(vnode, textNode);
 }
 
 function hydrateElementNode(
-  vnode: VNode & { type: string; props: Record<string, unknown> | null },
+  vnode: ElementVNode,
   el: Element,
   path: HydrationPath,
   options: HydrateOptions | undefined,
@@ -153,11 +157,11 @@ function hydrateElementNode(
 
   applyProps(el, vnode.props ?? {});
 
-  hydrateChildren(vnode.props?.children, el, path, options, depth + 1);
+  hydrateChildren(vnode.children, el, path, options, depth + 1);
 }
 
 function hydrateFragmentNode(
-  vnode: VNode & { children?: unknown[] },
+  vnode: FragmentVNode,
   el: Element,
   path: HydrationPath,
   options: HydrateOptions | undefined,
@@ -181,18 +185,35 @@ function hydrateChildren(
   options: HydrateOptions | undefined,
   depth: number,
 ): void {
-  // Invariant: elementIndex counts only element/component children (for path
-  // construction). domIndex counts all child nodes (elements + text nodes).
-  // elementIndex only advances when a non-text child is processed.
+  const result = hydrateChildrenInternal(
+    children,
+    parentEl,
+    parentPath,
+    options,
+    depth,
+    0,
+    0,
+  );
+  detectExtraChildren(parentEl, result.domIndex, parentPath, options);
+}
+
+function hydrateChildrenInternal(
+  children: unknown,
+  parentEl: Element,
+  parentPath: HydrationPath,
+  options: HydrateOptions | undefined,
+  depth: number,
+  startElementIndex = 0,
+  startDomIndex = 0,
+): { elementIndex: number; domIndex: number } {
   if (children === null || children === undefined) {
-    detectExtraChildren(parentEl, 0, parentPath, options);
-    return;
+    return { elementIndex: startElementIndex, domIndex: startDomIndex };
   }
 
   const childArray = Array.isArray(children) ? children : [children];
 
-  let elementIndex = 0;
-  let domIndex = 0;
+  let elementIndex = startElementIndex;
+  let domIndex = startDomIndex;
 
   for (const child of childArray) {
     if (child === null || child === undefined) continue;
@@ -202,6 +223,9 @@ function hydrateChildren(
     if (isTextVNode(childVNode)) {
       const domNode = parentEl.childNodes[domIndex];
       if (domNode?.nodeType === Node.TEXT_NODE) {
+        if (domNode.textContent !== childVNode.type) {
+          domNode.textContent = childVNode.type;
+        }
         setDomRef(childVNode, domNode);
         domIndex++;
       } else {
@@ -220,18 +244,26 @@ function hydrateChildren(
           parentEl.appendChild(textDom);
         }
         setDomRef(childVNode, textDom);
+        domIndex++;
       }
       continue;
     }
 
     if (isFragmentVNode(childVNode)) {
-      hydrateChildren(
-        (childVNode as VNode & { children?: unknown[] }).children,
+      const fragmentChildren =
+        (childVNode as VNode & { children?: unknown[] }).children;
+      const elementCount = countFragmentElements(fragmentChildren);
+      const fragmentResult = hydrateChildrenInternal(
+        fragmentChildren,
         parentEl,
         parentPath,
         options,
         depth,
+        elementIndex,
+        domIndex,
       );
+      elementIndex += elementCount;
+      domIndex = fragmentResult.domIndex;
       continue;
     }
 
@@ -262,7 +294,7 @@ function hydrateChildren(
 
     if (isElementVNode(childVNode)) {
       hydrateElementNode(
-        childVNode as VNode & { type: string; props: Record<string, unknown> | null },
+        childVNode as ElementVNode,
         domNode as Element,
         expectedPath,
         options,
@@ -282,7 +314,7 @@ function hydrateChildren(
     domIndex++;
   }
 
-  detectExtraChildren(parentEl, domIndex, parentPath, options);
+  return { elementIndex, domIndex };
 }
 
 function detectExtraChildren(
@@ -307,6 +339,9 @@ function detectExtraChildren(
       options?.onMismatch?.(mismatch);
       warnMismatch(mismatch);
       domNode.remove();
+      // Decrement i to re-examine this index after node removal,
+      // since childNodes is a live collection and subsequent nodes shift left.
+      i--;
     } else if (domNode.nodeType === Node.TEXT_NODE) {
       const mismatch: MismatchInfo = {
         kind: "extra-text",
@@ -317,6 +352,9 @@ function detectExtraChildren(
       options?.onMismatch?.(mismatch);
       warnMismatch(mismatch);
       domNode.remove();
+      // Decrement i to re-examine this index after node removal,
+      // since childNodes is a live collection and subsequent nodes shift left.
+      i--;
     }
   }
 }
@@ -335,10 +373,74 @@ function applyProps(el: Element, props: Record<string, unknown>): void {
 }
 
 function replaceWith(vnode: VNode, oldDom: Node): void {
-  const newDom = createDom(vnode);
+  const newDom = createDomDeep(vnode, 0);
   if (!oldDom.parentNode) {
     throw new InvariantError("replaceWith called on detached node");
   }
   oldDom.parentNode.replaceChild(newDom, oldDom);
   setDomRef(vnode, newDom);
+}
+
+function createDomDeep(vnode: VNode, depth: number): Node {
+  if (depth > MAX_HYDRATE_DEPTH) {
+    throw new InvariantError(
+      `Max hydration depth exceeded (${MAX_HYDRATE_DEPTH}). Possible circular vnode structure.`,
+    );
+  }
+
+  if (isTextVNode(vnode)) {
+    return createDom(vnode);
+  }
+
+  if (isElementVNode(vnode)) {
+    const el = createDom(vnode) as Element;
+    applyProps(el, vnode.props ?? {});
+    appendChildren(el, vnode.children, depth);
+    return el;
+  }
+
+  if (isFragmentVNode(vnode)) {
+    const fragment = document.createDocumentFragment();
+    appendChildren(
+      fragment,
+      (vnode as VNode & { children?: unknown[] }).children,
+      depth,
+    );
+    return fragment;
+  }
+
+  if (isComponentVNode(vnode)) {
+    throw new InvariantError(
+      "ComponentVNode should not reach createDom - components must be evaluated before hydration",
+    );
+  }
+
+  throw new InvariantError(`Unknown VNode kind: ${(vnode as VNode).kind}`);
+}
+
+function appendChildren(
+  parent: Element | DocumentFragment,
+  children: unknown,
+  depth: number,
+): void {
+  forEachChild(children, depth, (child: unknown) => {
+    const childDom = createDomDeep(child as VNode, depth + 1);
+    parent.appendChild(childDom);
+    setDomRef(child as VNode, childDom);
+  });
+}
+
+function countFragmentElements(children: unknown): number {
+  let count = 0;
+  forEachChild(children, 0, (child: unknown) => {
+    const vnode = child as VNode;
+    if (isElementVNode(vnode)) {
+      count++;
+    } else if (isFragmentVNode(vnode)) {
+      count += countFragmentElements(
+        (vnode as VNode & { children?: unknown[] }).children,
+      );
+    }
+  });
+  return count;
 }

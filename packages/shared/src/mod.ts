@@ -46,3 +46,6 @@ export {
   parseHydrationPath,
 } from "./hydration.ts";
 export type { HydrationPath } from "./hydration.ts";
+
+export { forEachChild } from "./vnode.ts";
+export type { ChildCallback, VNodeChild } from "./vnode.ts";

@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert@1.0.19";
+import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert";
 import { createElementVNode, createTextVNode } from "@ggpwnkthx/jsx";
 import {
   createDom,

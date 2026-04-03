@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.7] - 2026-04-03
+
+### Added
+
+- `@ggpwnkthx/dom-shared`: New `forEachChild` utility for shared child traversal logic
+- `@ggpwnkthx/dom-hydrate`: `createDomDeep` function for recursive DOM creation in replacement scenarios
+- `@ggpwnkthx/dom-hydrate`: `appendChildren` helper using shared `forEachChild`
+- `@ggpwnkthx/dom-hydrate`: `countFragmentElements` helper for fragment element counting
+- `@ggpwnkthx/dom-hydrate`: 13 comprehensive hydration tests covering exact match, type mismatch, text drift, consecutive extras, fragment flattening, and nested fragments
+- `@ggpwnkthx/dom-hydrate`: Added `@ggpwnkthx/dom-shared` import for shared utilities
+
+### Changed
+
+- `@ggpwnkthx/dom-hydrate`: Refactored `hydrateChildren` into `hydrateChildren` entry point and `hydrateChildrenInternal` returning element/dom indices
+- `@ggpwnkthx/dom-hydrate`: `hydrateElementNode` now uses `vnode.children` instead of `vnode.props?.children` for consistency
+- `@ggpwnkthx/dom-hydrate`: Children access aligned across hydrate and mount—read from `vnode.children` directly
+- `@ggpwnkthx/dom-runtime`: `mount.ts` now uses shared `forEachChild` utility with fallback from `props.children` to `children`
+- `@ggpwnkthx/dom-hydrate`: Type imports use `TextVNode`, `ElementVNode`, `FragmentVNode` from `@ggpwnkthx/jsx`
+
+### Fixed
+
+- `@ggpwnkthx/dom-hydrate`: Text drift now patched in place when text content differs (preserves Text node reference)
+- `@ggpwnkthx/dom-hydrate`: Consecutive extra nodes both removed correctly (`i--` fix after `domNode.remove()`)
+- `@ggpwnkthx/dom-hydrate`: Fragment element index tracking fixed with `startElementIndex`/`startDomIndex` propagation
+- `@ggpwnkthx/dom-hydrate`: Nested fragment flattening works correctly—text nodes and elements at all nesting levels preserved
+- `@ggpwnkthx/dom-hydrate`: `domIndex` properly incremented after text replacement to prevent `detectExtraChildren` from removing just-inserted nodes
+- `@ggpwnkthx/dom-hydrate`: `@std/assert` import alias added to package imports
+
 ## [0.0.1-rc.6] - 2026-04-02
 
 ### Changed
