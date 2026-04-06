@@ -14,6 +14,7 @@ import {
 } from "@ggpwnkthx/jsx";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { setProp } from "./set-prop.ts";
+import { isEventProp, setEventHandler } from "../events.ts";
 
 export function createDom(vnode: VNode): Node {
   if (isTextVNode(vnode)) {
@@ -39,12 +40,16 @@ function createTextNode(vnode: TextVNode): Text {
   return document.createTextNode(vnode.type);
 }
 
-function createElementNode(vnode: ElementVNode): HTMLElement {
+function createElementNode(vnode: ElementVNode): Element {
   const el = document.createElement(vnode.type);
   if (vnode.props) {
     for (const [key, value] of Object.entries(vnode.props)) {
       if (key === "children") continue;
-      setProp(el, key, value);
+      if (isEventProp(key)) {
+        setEventHandler(el, key, value as (...args: unknown[]) => void);
+      } else {
+        setProp(el, key, value);
+      }
     }
   }
   return el;
@@ -54,5 +59,4 @@ export function replaceNode(oldDom: Node, newDom: Node): void {
   oldDom.parentNode?.replaceChild(newDom, oldDom);
 }
 
-export { setProp } from "./set-prop.ts";
-export { removeProp, setText } from "./remove-prop.ts";
+export { removeProp, setProp, setText } from "./set-prop.ts";

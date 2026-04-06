@@ -1,11 +1,16 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import {
   addEventListener,
+  assertIsNotEventProp,
   isEventProp,
   normalizeEventName,
   removeEventListener,
   setEventHandler,
 } from "../src/events.ts";
+import { InvariantError } from "@ggpwnkthx/dom-shared";
+import { env } from "../../../tests/dom-test-environment.ts";
+
+env.createContainer(); // Initialize DOM globals
 
 Deno.test("isEventProp returns true for onClick", () => {
   assertEquals(isEventProp("onClick"), true);
@@ -35,13 +40,35 @@ Deno.test("normalizeEventName converts onChange to change", () => {
   assertEquals(normalizeEventName("onChange"), "change");
 });
 
+Deno.test("assertIsNotEventProp throws for event prop", () => {
+  assertThrows(
+    () => assertIsNotEventProp("onClick"),
+    InvariantError,
+    'Cannot use setProp/removeProp on event prop "onClick"',
+  );
+});
+
+Deno.test("assertIsNotEventProp throws for onMouseOver", () => {
+  assertThrows(
+    () => assertIsNotEventProp("onMouseOver"),
+    InvariantError,
+    'Cannot use setProp/removeProp on event prop "onMouseOver"',
+  );
+});
+
+Deno.test("assertIsNotEventProp does not throw for regular prop", () => {
+  assertIsNotEventProp("class");
+  assertIsNotEventProp("id");
+  assertIsNotEventProp("data-value");
+});
+
 Deno.test("addEventListener binds event handler", () => {
   const el = document.createElement("button");
   let called = false;
   addEventListener(el, "onClick", () => {
     called = true;
   });
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(called, true);
 });
 
@@ -52,10 +79,10 @@ Deno.test("removeEventListener removes event handler", () => {
     callCount++;
   };
   addEventListener(el, "onClick", handler);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(callCount, 1);
   removeEventListener(el, "onClick", handler);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(callCount, 1);
 });
 
@@ -66,11 +93,11 @@ Deno.test("setEventHandler updates handler", () => {
   const handler1 = () => handler1Count++;
   const handler2 = () => handler2Count++;
   setEventHandler(el, "onClick", handler1);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(handler1Count, 1);
   assertEquals(handler2Count, 0);
   setEventHandler(el, "onClick", handler2, handler1);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(handler1Count, 1);
   assertEquals(handler2Count, 1);
 });
@@ -80,9 +107,9 @@ Deno.test("setEventHandler removes old handler when new is null", () => {
   let callCount = 0;
   const handler = () => callCount++;
   setEventHandler(el, "onClick", handler);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(callCount, 1);
   setEventHandler(el, "onClick", null, handler);
-  el.click();
+  el.dispatchEvent(new Event("click", { bubbles: true }));
   assertEquals(callCount, 1);
 });

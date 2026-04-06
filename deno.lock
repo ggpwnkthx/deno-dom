@@ -1,8 +1,10 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@b-fuze/deno-dom@*": "0.1.56",
     "jsr:@b-fuze/deno-dom@0.1": "0.1.56",
     "jsr:@ggpwnkthx/jsx@0.1": "0.1.8",
+    "jsr:@ggpwnkthx/jsx@0.1.8": "0.1.8",
     "jsr:@ggpwnkthx/jsx@~0.1.8": "0.1.8",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.12"
@@ -26,6 +28,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@b-fuze/deno-dom@0.1",
       "jsr:@std/assert@1"
     ],
     "members": {
@@ -39,6 +42,7 @@
       },
       "packages/runtime": {
         "dependencies": [
+          "jsr:@b-fuze/deno-dom@0.1",
           "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.1",
           "jsr:@ggpwnkthx/jsx@~0.1.8"
         ]

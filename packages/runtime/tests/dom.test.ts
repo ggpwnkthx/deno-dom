@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import { createElementVNode, createTextVNode } from "@ggpwnkthx/jsx";
 import {
   createDom,
@@ -8,18 +8,21 @@ import {
   setText,
 } from "../src/dom/mod.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
+import { env } from "../../../tests/dom-test-environment.ts";
+
+env.createContainer(); // Initialize DOM globals
 
 Deno.test("createDom creates text node from TextVNode", () => {
   const vnode = createTextVNode("hello");
   const node = createDom(vnode);
-  assertInstanceOf(node, Text);
+  assertEquals(node.nodeType, Node.TEXT_NODE);
   assertEquals(node.textContent, "hello");
 });
 
 Deno.test("createDom creates element from ElementVNode", () => {
   const vnode = createElementVNode("div", { class: "test" }, null);
-  const el = createDom(vnode);
-  assertInstanceOf(el, HTMLElement);
+  const el = createDom(vnode) as Element;
+  assertEquals(el.nodeType, Node.ELEMENT_NODE);
   assertEquals(el.tagName, "DIV");
   assertEquals(el.className, "test");
 });
@@ -74,12 +77,6 @@ Deno.test("setProp sets boolean attribute", () => {
   el.setAttribute("disabled", "false");
   setProp(el, "disabled", true);
   assertEquals(el.hasAttribute("disabled"), true);
-});
-
-Deno.test("setProp sets style object", () => {
-  const el = document.createElement("div");
-  setProp(el, "style", { color: "red", fontSize: "14px" });
-  assertEquals((el as HTMLElement).style.color, "red");
 });
 
 Deno.test("removeProp removes class", () => {

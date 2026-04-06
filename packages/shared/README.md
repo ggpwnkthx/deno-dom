@@ -4,7 +4,7 @@ Shared types, errors, and validation helpers used across the DOM package family.
 
 ## Status
 
-**Reserved** — no shared exports yet. This package is prepared for future common types and helpers.
+**Implemented** — shared types, errors, validation helpers, hydration path utilities, and vnode child traversal.
 
 ## Purpose
 

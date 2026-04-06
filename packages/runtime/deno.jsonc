@@ -26,6 +26,7 @@
   "exclude": [".*", "coverage"],
   "imports": {
     "@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.1",
-    "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1.8"
+    "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1.8",
+    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1"
   }
 }

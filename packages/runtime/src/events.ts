@@ -3,6 +3,8 @@
  * @module
  */
 
+import { InvariantError } from "@ggpwnkthx/dom-shared";
+
 const EVENT_PREFIX = "on";
 const EVENT_PREFIX_LENGTH = 2;
 
@@ -14,13 +16,9 @@ export function normalizeEventName(propName: string): string {
   return propName.slice(EVENT_PREFIX_LENGTH).toLowerCase();
 }
 
-export function normalizeAriaName(name: string): string {
-  return "aria" + name.slice(5, 6).toUpperCase() + name.slice(6);
-}
-
 export function assertIsNotEventProp(name: string): void {
   if (isEventProp(name)) {
-    throw new Error(
+    throw new InvariantError(
       `Cannot use setProp/removeProp on event prop "${name}". Use setEventHandler instead.`,
     );
   }
@@ -52,10 +50,10 @@ export function setEventHandler(
   handler: EventListener | null,
   oldHandler?: EventListener | null,
 ): void {
-  if (oldHandler) {
-    removeEventListener(el, propName, oldHandler as EventListener);
+  if (typeof oldHandler === "function") {
+    removeEventListener(el, propName, oldHandler);
   }
-  if (handler) {
+  if (typeof handler === "function") {
     addEventListener(el, propName, handler);
   }
 }

@@ -14,11 +14,11 @@ import {
   type VNode,
 } from "@ggpwnkthx/jsx";
 import { createDom, replaceNode } from "../dom/mod.ts";
-import { removeDomRef, setDomRef } from "../types.ts";
+import { getFragmentRange, removeDomRef, setDomRef } from "../types.ts";
 import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { patchText } from "./text.ts";
 import { patchProps } from "./props.ts";
-import { diffChildren, type PatchFn } from "./diff-children.ts";
+import { diffChildren, diffFragmentChildren, type PatchFn } from "./diff-children.ts";
 
 const MAX_PATCH_DEPTH = 1000;
 
@@ -124,13 +124,30 @@ function patchFragment(
   _parentDom: ParentNode,
   depth: number,
 ): Node {
-  // Reserved for future use: keyed fragment reordering
+  const range = getFragmentRange(oldVNode);
+  if (range) {
+    diffFragmentChildren(
+      patch,
+      range.parent,
+      range.startIndex,
+      oldVNode.children ?? [],
+      newVNode.children ?? [],
+      depth,
+    );
+    return domNode;
+  }
   if (domNode.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
     throw new InvariantError(
       `Expected DocumentFragment node but got ${domNode.nodeName}. VNode kind: fragment`,
     );
   }
-  diffChildren(patch, domNode, oldVNode.children ?? [], newVNode.children ?? [], depth);
+  diffChildren(
+    patch,
+    domNode,
+    oldVNode.children ?? [],
+    newVNode.children ?? [],
+    depth,
+  );
   return domNode;
 }
 

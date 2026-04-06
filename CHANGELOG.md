@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.11] - 2026-04-03
+
+### Changed
+
+- `@ggpwnkthx/dom-runtime`: `createElementNode` returns `Element` instead of `HTMLElement` for broader compatibility
+- `@ggpwnkthx/dom-runtime`: Merged `remove-prop.ts` into `set-prop.ts` — `removeProp` and `setText` now exported from `set-prop.ts`
+- `@ggpwnkthx/dom-runtime`: `normalizeAriaName` moved from `events.ts` to new `dom/utils.ts` module
+- `@ggpwnkthx/dom-runtime`: `setEventHandler` now validates handler types and uses `InvariantError` instead of plain `Error`
+- `@ggpwnkthx/dom-runtime`: `mount.ts` handles fragment vnode mounting with explicit start index tracking
+- `@ggpwnkthx/dom-runtime`: Fragment children now use direct array iteration instead of `forEachChild` utility
+
+### Added
+
+- `@ggpwnkthx/dom-runtime`: `dom/utils.ts` module with `normalizeAriaName` helper function
+- `@ggpwnkthx/dom-runtime`: `diffFragmentChildren` in `diff-children.ts` for fragment-specific diffing with start index
+- `@ggpwnkthx/dom-runtime`: Fragment range tracking via `fragmentRanges` WeakMap in `types.ts` — enables `getFragmentRange` to retrieve parent and start index
+- `@ggpwnkthx/dom-runtime`: `setFragmentRef` exported for storing fragment mounting metadata
+- `@ggpwnkthx/dom-runtime`: Fragment patching support in `patchFragment` using `getFragmentRange` for range-based child diffing
+- `@ggpwnkthx/dom-runtime`: `tests/fragment.test.ts` for fragment mounting and patching behavior
+- `@ggpwnkthx/dom-runtime`: `tests/dom-test-environment.ts` shared test environment for DOM globals initialization
+
+### Fixed
+
+- `@ggpwnkthx/dom-runtime`: `setProp`/`removeProp` on event props now throw `InvariantError` (was plain `Error`)
+- `@ggpwnkthx/dom-runtime`: Event handler cleanup correctly checks `typeof oldHandler === 'function'` before removing
+
+### Tests
+
+- `@ggpwnkthx/dom-runtime`: All tests updated to use shared `env.createContainer()` for DOM globals initialization
+- `@ggpwnkthx/dom-runtime`: Replaced `assertInstanceOf` with `assertEquals(nodeType, Node.ELEMENT_NODE)` assertions
+- `@ggpwnkthx/dom-runtime`: Replaced `el.click()` with `el.dispatchEvent(new Event("click", { bubbles: true }))` for event testing
+
 ## [0.0.1-rc.10] - 2026-04-03
 
 ### Fixed

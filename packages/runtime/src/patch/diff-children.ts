@@ -15,14 +15,14 @@ export type PatchFn = (
   depth?: number,
 ) => Node;
 
-export function diffChildren(
+function diffArrayChildren(
   patch: PatchFn,
-  domNode: Node,
+  existingDomChildren: Node[],
   oldChildren: readonly unknown[],
   newChildren: readonly unknown[],
   depth: number,
+  parentDom: ParentNode,
 ): void {
-  const existingDomChildren = Array.from(domNode.childNodes);
   const maxLength = Math.max(oldChildren.length, newChildren.length);
   for (let i = 0; i < maxLength; i++) {
     const oldChild = oldChildren[i];
@@ -33,24 +33,55 @@ export function diffChildren(
         if (oldChild !== null && oldChild !== undefined) {
           removeDomRef(oldChild as VNode);
         }
-        domNode.removeChild(existingDom);
+        parentDom.removeChild(existingDom);
       } else if (oldChild === null || oldChild === undefined) {
         const newDom = createDom(newChild as VNode);
-        domNode.insertBefore(newDom, existingDom);
+        parentDom.insertBefore(newDom, existingDom);
         setDomRef(newChild as VNode, newDom);
       } else {
         patch(
           oldChild as VNode,
           newChild as VNode,
           existingDom,
-          domNode as ParentNode,
+          parentDom,
           depth + 1,
         );
       }
     } else if (newChild !== null && newChild !== undefined) {
       const newDom = createDom(newChild as VNode);
-      domNode.appendChild(newDom);
+      parentDom.appendChild(newDom);
       setDomRef(newChild as VNode, newDom);
     }
   }
+}
+
+export function diffChildren(
+  patch: PatchFn,
+  domNode: Node,
+  oldChildren: readonly unknown[],
+  newChildren: readonly unknown[],
+  depth: number,
+): void {
+  const existingDomChildren = Array.from(domNode.childNodes);
+  diffArrayChildren(
+    patch,
+    existingDomChildren,
+    oldChildren,
+    newChildren,
+    depth,
+    domNode as ParentNode,
+  );
+}
+
+export function diffFragmentChildren(
+  patch: PatchFn,
+  parentDom: ParentNode,
+  startIndex: number,
+  oldChildren: readonly unknown[],
+  newChildren: readonly unknown[],
+  depth: number,
+): void {
+  const existingDomChildren = Array.from(parentDom.childNodes);
+  const slicedChildren = existingDomChildren.slice(startIndex);
+  diffArrayChildren(patch, slicedChildren, oldChildren, newChildren, depth, parentDom);
 }

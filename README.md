@@ -19,7 +19,7 @@ This workspace contains the following packages:
 
 ## Status
 
-**Scaffold/skeleton phase** — no DOM logic is implemented yet.
+**Working implementations** — all four packages (`shared`, `runtime`, `hydrate`, `scheduler`) have functional code and tests.
 
 ## Dependency Direction
 
@@ -43,11 +43,4 @@ import { ... } from "jsr:@ggpwnkthx/dom";
 
 ## Note
 
-This is the root facade package. It re-exports stable public APIs from leaf packages. Implementation logic lives in the leaf packages.
-
-## Recommended Follow-on Build Plan Order
-
-1. `@ggpwnkthx/dom-shared`
-2. `@ggpwnkthx/dom-scheduler`
-3. `@ggpwnkthx/dom-runtime`
-4. `@ggpwnkthx/dom-hydrate`
+This is the root facade package. It currently re-exports stable public APIs from `@ggpwnkthx/dom-shared`. Implementation logic lives in the leaf packages.
