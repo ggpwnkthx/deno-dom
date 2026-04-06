@@ -23,6 +23,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `@ggpwnkthx/dom-runtime`: Updated import version reference in README to `@0.0.1-rc.3`
 
+## [0.0.1-rc.13] - 2026-04-06
+
+### Added
+
+- `@ggpwnkthx/dom-hydrate`: `HydrationError` class — domain-specific error with typed `HydrationErrorCode` union (`INVALID_VNODE`, `MAX_DEPTH_EXCEEDED`, `NON_VNODE_CHILD`, `DETACHED_NODE`) and factory functions (`invalidVNodeError`, `maxDepthExceededError`, `nonVNodeChildError`, `detachedNodeError`)
+- `@ggpwnkthx/dom-hydrate`: `hydrateResult(vnode, container, options?)` — alternative to `hydrate()` that returns `Result<VNode, HydrationError>` instead of throwing on invariant violations
+- `@ggpwnkthx/dom-hydrate`: `errors.ts` module — internal module exporting `HydrationError` and factory functions
+
+### Tests
+
+- `@ggpwnkthx/dom-hydrate`: `hydrate-result.test.ts` — 11 tests covering `hydrateResult` success path, error paths (`INVALID_VNODE`, `MAX_DEPTH_EXCEEDED`, `NON_VNODE_CHILD`), error context preservation, and mismatch callback behavior
+
+### Changed
+
+- `@ggpwnkthx/dom-hydrate`: `hydrate()` now passes context `{ name: "vnode", value }` when throwing `InvariantError` for non-VNode input
+- `@ggpwnkthx/dom-hydrate`: `mapInvariantToHydrationError` error mapping improved from `msg.includes()` string checks to regex patterns with capture groups
+
 ## [0.0.1-rc.11] - 2026-04-03
 
 ### Changed

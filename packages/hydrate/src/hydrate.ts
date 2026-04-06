@@ -7,9 +7,11 @@
 
 import {
   buildHydrationPath,
+  err,
   forEachChild,
   type HydrationPath,
   InvariantError,
+  ok,
   parseHydrationPath,
 } from "@ggpwnkthx/dom-shared";
 import {
@@ -32,6 +34,14 @@ import {
   type TextVNode,
   type VNode,
 } from "@ggpwnkthx/jsx";
+import {
+  detachedNodeError,
+  HydrationError,
+  invalidVNodeError,
+  maxDepthExceededError,
+  nonVNodeChildError,
+} from "./errors.ts";
+import type { Result } from "@ggpwnkthx/dom-shared";
 
 const MAX_HYDRATE_DEPTH = 1000;
 const HYDRATION_MARKER = "data-hk";
@@ -46,7 +56,10 @@ export function hydrate(
   options?: HydrateOptions,
 ): VNode {
   if (!isVNode(vnode)) {
-    throw new InvariantError("hydrate expects a VNode");
+    throw new InvariantError("hydrate expects a VNode", {
+      name: "vnode",
+      value: vnode,
+    });
   }
 
   const rootPath = "0" as HydrationPath;
@@ -68,6 +81,49 @@ export function hydrate(
   }
 
   return vnode;
+}
+
+const DEPTH_EXCEEDED_PATTERN = /Max hydration depth exceeded \((\d+)\)/;
+const NON_VNODE_CHILD_PATTERN = /non-VNode child(?: at path [^:]+)?(?:: )?(.+)/;
+const DETACHED_PATTERN = /replaceWith called on detached node/;
+
+function mapInvariantToHydrationError(e: unknown): HydrationError {
+  if (e instanceof HydrationError) {
+    return e;
+  }
+  if (e instanceof InvariantError) {
+    const msg = e.message;
+    const depthMatch = DEPTH_EXCEEDED_PATTERN.exec(msg);
+    if (depthMatch) {
+      return maxDepthExceededError(parseInt(depthMatch[1], 10));
+    }
+    const nonVNodeMatch = NON_VNODE_CHILD_PATTERN.exec(msg);
+    if (nonVNodeMatch) {
+      const childType = nonVNodeMatch[1] ?? "unknown";
+      return nonVNodeChildError(childType, "hydration");
+    }
+    if (DETACHED_PATTERN.test(msg)) {
+      return detachedNodeError();
+    }
+    return invalidVNodeError(e.context?.value);
+  }
+  return new HydrationError(
+    e instanceof Error ? e.message : "Unknown error",
+    "INVALID_VNODE",
+  );
+}
+
+export function hydrateResult(
+  vnode: VNode,
+  container: ParentNode,
+  options?: HydrateOptions,
+): Result<VNode, HydrationError> {
+  try {
+    const result = hydrate(vnode, container, options);
+    return ok(result);
+  } catch (e) {
+    return err(mapInvariantToHydrationError(e));
+  }
 }
 
 function hydrateElement(

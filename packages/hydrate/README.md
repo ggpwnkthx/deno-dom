@@ -75,11 +75,37 @@ After successful hydration:
 ## Usage
 
 ```typescript
-import { hydrate, type MismatchInfo } from "@ggpwnkthx/dom-hydrate";
+import {
+  hydrate,
+  hydrateResult,
+  HydrationError,
+  type MismatchInfo,
+} from "@ggpwnkthx/dom-hydrate";
 
+// Throw-based API
 const mismatches: MismatchInfo[] = [];
 hydrate(vnode, container, { onMismatch: (m) => mismatches.push(m) });
+
+// Result-based API for error-safe callers
+const result = hydrateResult(vnode, container);
+if (result.ok) {
+  // result.value is the hydrated vnode
+} else {
+  // result.error is a HydrationError with typed code
+  if (result.error.code === "MAX_DEPTH_EXCEEDED") {
+    // handle circular structure
+  }
+}
 ```
+
+### Error Codes
+
+`HydrationError.code` is one of:
+
+- `INVALID_VNODE` — input is not a valid VNode
+- `MAX_DEPTH_EXCEEDED` — vnode tree exceeds `MAX_HYDRATE_DEPTH` (1000), possible circular structure
+- `NON_VNODE_CHILD` — child that is not a VNode was encountered during traversal
+- `DETACHED_NODE` — attempted to replace a DOM node that has been removed from the document
 
 ## Dependencies
 
