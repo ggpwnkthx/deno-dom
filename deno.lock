@@ -35,7 +35,7 @@
       "packages/hydrate": {
         "dependencies": [
           "jsr:@b-fuze/deno-dom@0.1",
-          "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.1",
+          "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.3",
           "jsr:@ggpwnkthx/jsx@0.1",
           "jsr:@std/assert@1"
         ]
@@ -43,7 +43,7 @@
       "packages/runtime": {
         "dependencies": [
           "jsr:@b-fuze/deno-dom@0.1",
-          "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.1",
+          "jsr:@ggpwnkthx/dom-shared@^0.0.1-rc.3",
           "jsr:@ggpwnkthx/jsx@~0.1.8"
         ]
       }

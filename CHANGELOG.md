@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.1-rc.12] - 2026-04-06
+
+### Tests
+
+- `@ggpwnkthx/dom-hydrate`: `diagnostics.test.ts` — exhaustive tests for `formatMismatchKind` (all 6 `MismatchKind` variants + unknown fallback) and `formatMismatch` (path inclusion, omitted actualPath)
+- `@ggpwnkthx/dom-hydrate`: `extra-text.test.ts` — tests extra text node detection and removal, verifies `MismatchExtra` discriminated union shape (`vnode === null`, `domNode.nodeType`)
+- `@ggpwnkthx/dom-hydrate`: `mismatch-handling.test.ts` — added `marker-mismatch` test (data-hk path does not match expected tree position), path assertions use validated `HydrationPath` via `parseHydrationPath`
+- `@ggpwnkthx/dom-hydrate`: `no-ssr-fallback.test.ts` — tests fresh DOM creation when `container.firstElementChild` is absent, verifies dom ref attachment for all vnode types
+- `@ggpwnkthx/dom-hydrate`: `props.test.ts` — tests prop reconciliation (stale attr removal, data-hk preservation) and event rebinding (handler invoked after hydration, handler rebound after node replacement)
+- `@ggpwnkthx/dom-hydrate`: `_shared-test-helpers.ts` — shared `makePath(segments: string): HydrationPath` helper for consistent path fixture construction
+- `@ggpwnkthx/dom-runtime`: `diff-children.test.ts` — tests `diffChildren` edge cases: empty old/new children arrays, null/undefined entries, text in-place updates
+- `@ggpwnkthx/dom-runtime`: `dom-refs.test.ts` — tests `getDomRef`/`setDomRef`/`removeDomRef` behavior: null for unmounted vnodes, ref storage and retrieval, overwriting, clearing, fragment vnode returns null
+- `@ggpwnkthx/dom-shared`: `hydration.test.ts` — tests `isHydrationPath`, `parseHydrationPath`, and `buildHydrationPath` for path validation, parsing, and construction
+
+### Changed
+
+- `@ggpwnkthx/dom-runtime`: Updated import version reference in README to `@0.0.1-rc.3`
+
 ## [0.0.1-rc.11] - 2026-04-03
 
 ### Changed

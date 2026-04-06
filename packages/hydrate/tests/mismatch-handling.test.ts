@@ -4,6 +4,7 @@ import { createElementVNode, createTextVNode } from "@ggpwnkthx/jsx";
 import { getDomRef } from "@ggpwnkthx/dom-runtime";
 import { hydrate, type MismatchInfo } from "@ggpwnkthx/dom-hydrate";
 import { env } from "./test-environment.ts";
+import { makePath } from "./_shared-test-helpers.ts";
 
 Deno.test("hydrate decision: replaces only the mismatched child subtree", () => {
   const ssrHTML =
@@ -42,7 +43,7 @@ Deno.test("hydrate decision: replaces only the mismatched child subtree", () => 
 
   assertEquals(mismatches.length, 1);
   assertEquals(mismatches[0]?.kind, "tag-mismatch");
-  assertEquals(mismatches[0]?.expectedPath, "0.0");
+  assertEquals(mismatches[0]?.expectedPath, makePath("0.0"));
 });
 
 Deno.test("hydrate decision: type-mismatch when text vnode meets element node", () => {
@@ -71,7 +72,34 @@ Deno.test("hydrate decision: type-mismatch when text vnode meets element node", 
 
   assertEquals(mismatches.length, 1);
   assertEquals(mismatches[0]?.kind, "type-mismatch");
-  assertEquals(mismatches[0]?.expectedPath, "0");
+  assertEquals(mismatches[0]?.expectedPath, makePath("0"));
+});
+
+Deno.test("hydrate decision: marker-mismatch when data-hk does not match expected path", () => {
+  const ssrHTML = '<div data-hk="0"><p data-hk="0.9">Content</p></div>';
+  const container = env.createSSRContainer(ssrHTML);
+
+  const existingRoot = container.firstElementChild as HTMLDivElement;
+  const vnode = createElementVNode("div", null, null, [
+    createElementVNode("p", null, null, [createTextVNode("Content")]),
+  ]);
+
+  const mismatches: MismatchInfo[] = [];
+  hydrate(vnode, container, {
+    onMismatch: (info) => mismatches.push(info),
+  });
+
+  const currentRoot = container.firstElementChild as HTMLDivElement;
+  const currentFirst = currentRoot.firstElementChild as HTMLParagraphElement;
+
+  assertEquals(currentRoot === existingRoot, true);
+  assertEquals(currentFirst.tagName, "P");
+  assertEquals(currentFirst.textContent, "Content");
+
+  assertEquals(mismatches.length, 1);
+  assertEquals(mismatches[0]?.kind, "marker-mismatch");
+  assertEquals(mismatches[0]?.expectedPath, makePath("0.0"));
+  assertEquals(mismatches[0]?.actualPath, makePath("0.9"));
 });
 
 Deno.test("hydrate decision: replaceWith creates deep nested children via createDomDeep", () => {
