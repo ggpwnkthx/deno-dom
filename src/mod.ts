@@ -9,6 +9,26 @@
  * - @ggpwnkthx/dom-shared   - Shared types, errors, and validation helpers
  *
  * @module
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   DOMSharedError,
+ *   err,
+ *   hydrate,
+ *   hydrateResult,
+ *   HydrationError,
+ *   InvariantError,
+ *   type MismatchInfo,
+ *   mount,
+ *   ok,
+ *   patch,
+ *   type Result,
+ *   schedule,
+ *   type Scheduler,
+ *   ValidationError,
+ * } from "jsr:@ggpwnkthx/dom@^0.0.2";
+ * ```
  */
 
 export { hydrate, hydrateResult } from "@ggpwnkthx/dom-hydrate";

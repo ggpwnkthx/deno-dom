@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3] - 2026-04-07
+
+### Added
+
+- All packages: Usage example code blocks (`@example` JSDoc) added to all public entry points (`src/mod.ts`, `packages/*/src/mod.ts`) demonstrating common use cases
+- `@ggpwnkthx/dom-runtime` README: Runnable usage example with `mount` and `patch` showing vnode creation and DOM patching
+- `@ggpwnkthx/dom-shared` README: Usage example demonstrating `Result` type, typed errors, and hydration path utilities
+- `@ggpwnkthx/dom-scheduler` README: Usage example showing `schedule` and `SchedulerConfig` usage
+
+### Changed
+
+- All packages: Version bumped from 0.0.2 to 0.0.3
+
 ## [0.0.2] - 2026-04-07
 
 ### Added

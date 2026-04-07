@@ -8,12 +8,53 @@ Client DOM mount and patch behavior for `@ggpwnkthx/jsx` vnodes.
 
 ## Public API
 
-```ts
+```typescript
+import { mount, patch } from "jsr:@ggpwnkthx/dom-runtime";
+import type { VNode } from "jsr:@ggpwnkthx/dom-runtime";
+```
+
+## Usage
+
+```typescript
 import { mount, patch } from "jsr:@ggpwnkthx/dom-runtime";
 import type { VNode } from "jsr:@ggpwnkthx/dom-runtime";
 
-mount(vnode: VNode, container: ParentNode): void;
-patch(oldVNode: VNode, newVNode: VNode, domNode: Node, parentDom: ParentNode): Node;
+// Mount a vnode tree to the DOM
+const vnode: VNode = {
+  type: "div",
+  props: { class: "container", id: "app" },
+  children: [
+    { type: "h1", props: {}, children: "Hello World" },
+    {
+      type: "button",
+      props: { onClick: () => console.log("clicked") },
+      children: "Click me",
+    },
+  ],
+};
+
+mount(vnode, document.body);
+
+// Patch an existing vnode with updates
+const newVNode: VNode = {
+  type: "div",
+  props: { class: "container updated", id: "app" },
+  children: [
+    { type: "h1", props: {}, children: "Hello Updated World" },
+    {
+      type: "button",
+      props: { onClick: () => console.log("clicked") },
+      children: "Click me",
+    },
+  ],
+};
+
+const updatedDom = patch(
+  vnode,
+  newVNode,
+  document.getElementById("app")!,
+  document.body,
+);
 ```
 
 ## Features
