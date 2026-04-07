@@ -72,14 +72,19 @@ After successful hydration:
 - Extra DOM nodes are removed during hydration
 - Tree is ready for patch-based updates via `@ggpwnkthx/dom-runtime`
 
-## Usage
+## Public API
 
 ```typescript
 import {
   hydrate,
+  type HydrateOptions,
   hydrateResult,
   HydrationError,
+  isMismatchExtra,
+  isMismatchInfo,
+  isMismatchWithVNode,
   type MismatchInfo,
+  type MismatchKind,
 } from "@ggpwnkthx/dom-hydrate";
 
 // Throw-based API
@@ -95,6 +100,13 @@ if (result.ok) {
   if (result.error.code === "MAX_DEPTH_EXCEEDED") {
     // handle circular structure
   }
+}
+
+// Type guard usage
+if (isMismatchExtra(mismatch)) {
+  // mismatch.vnode === null, mismatch.domNode is the extra Node
+} else if (isMismatchWithVNode(mismatch)) {
+  // mismatch.vnode is the VNode, mismatch.domNode may be null
 }
 ```
 

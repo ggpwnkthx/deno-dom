@@ -3,6 +3,7 @@ import {
   buildHydrationPath,
   isHydrationPath,
   parseHydrationPath,
+  parseHydrationPathFromString,
 } from "../src/hydration.ts";
 import { env } from "../../../tests/dom-test-environment.ts";
 
@@ -77,4 +78,34 @@ Deno.test("parseHydrationPath returns null for empty marker value", () => {
   const el = document.createElement("div");
   el.setAttribute("data-hk", "");
   assertEquals(parseHydrationPath(el), null);
+});
+
+Deno.test("parseHydrationPathFromString returns path for valid string", () => {
+  assertEquals(parseHydrationPathFromString("0"), "0");
+  assertEquals(parseHydrationPathFromString("0.0"), "0.0");
+  assertEquals(parseHydrationPathFromString("1.2.3.4.5"), "1.2.3.4.5");
+});
+
+Deno.test("parseHydrationPathFromString returns null for invalid string", () => {
+  assertEquals(parseHydrationPathFromString(""), null);
+  assertEquals(parseHydrationPathFromString("a"), null);
+  assertEquals(parseHydrationPathFromString("0."), null);
+  assertEquals(parseHydrationPathFromString(".0"), null);
+  assertEquals(parseHydrationPathFromString("0..0"), null);
+  assertEquals(parseHydrationPathFromString("-1"), null);
+  assertEquals(parseHydrationPathFromString("not-a-path"), null);
+});
+
+Deno.test("buildHydrationPath throws for invalid constructed path", () => {
+  let threw = false;
+  let message = "";
+  try {
+    // deno-lint-ignore no-explicit-any
+    buildHydrationPath("invalid" as any, 0);
+  } catch (e) {
+    threw = true;
+    message = (e as Error).message;
+  }
+  assertEquals(threw, true);
+  assertEquals(message.includes("invalid path"), true);
 });

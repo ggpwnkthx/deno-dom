@@ -44,6 +44,7 @@ export {
   HYDRATION_ATTR,
   isHydrationPath,
   parseHydrationPath,
+  parseHydrationPathFromString,
 } from "./hydration.ts";
 export type { HydrationPath } from "./hydration.ts";
 

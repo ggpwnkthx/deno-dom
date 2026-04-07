@@ -21,10 +21,18 @@ export function parseHydrationPath(el: Element): HydrationPath | null {
   return value as HydrationPath;
 }
 
+export function parseHydrationPathFromString(value: string): HydrationPath | null {
+  if (!isHydrationPath(value)) return null;
+  return value as HydrationPath;
+}
+
 export function buildHydrationPath(
   parentPath: HydrationPath | null,
   childIndex: number,
 ): HydrationPath {
   const path = parentPath === null ? String(childIndex) : `${parentPath}.${childIndex}`;
+  if (!isHydrationPath(path)) {
+    throw new Error(`buildHydrationPath produced invalid path: ${path}`);
+  }
   return path as HydrationPath;
 }

@@ -12,6 +12,7 @@ Shared types, errors, and validation helpers used across the DOM package family.
 - Typed error shapes (`DOMSharedError`, `ValidationError`, `InvariantError`, `NotImplementedError`)
 - `Result<T, E>` discriminated union for error-returning APIs
 - Centralized validation helpers
+- Hydration path utilities: `HydrationPath` branded type, `isHydrationPath`, `parseHydrationPath`, `parseHydrationPathFromString`, `buildHydrationPath`
 - Cross-package internal conventions
 
 ## Note

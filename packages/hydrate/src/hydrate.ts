@@ -62,7 +62,7 @@ export function hydrate(
     });
   }
 
-  const rootPath = "0" as HydrationPath;
+  const rootPath = buildHydrationPath(null, 0);
   const rootDom = container.firstElementChild;
 
   if (!rootDom) {
@@ -287,7 +287,7 @@ function hydrateFragmentRoot(
           kind: "type-mismatch",
           vnode: childVNode,
           domNode: domNode ?? null,
-          expectedPath: String(elementIndex) as HydrationPath,
+          expectedPath: buildHydrationPath(null, elementIndex),
           actualPath: undefined,
         };
         options?.onMismatch?.(mismatch);
@@ -318,7 +318,7 @@ function hydrateFragmentRoot(
       continue;
     }
 
-    const expectedPath = String(elementIndex) as HydrationPath;
+    const expectedPath = buildHydrationPath(null, elementIndex);
 
     let domNode = container.childNodes[domIndex];
     while (domNode && domNode.nodeType !== Node.ELEMENT_NODE) {
@@ -356,7 +356,12 @@ function hydrateFragmentRoot(
     domIndex++;
   }
 
-  detectExtraChildren(container as Element, domIndex, "" as HydrationPath, options);
+  detectExtraChildren(
+    container as Element,
+    domIndex,
+    buildHydrationPath(null, 0),
+    options,
+  );
 }
 
 function hydrateNestedFragmentChildren(
@@ -397,7 +402,7 @@ function hydrateNestedFragmentChildren(
           kind: "type-mismatch",
           vnode: childVNode,
           domNode: domNode ?? null,
-          expectedPath: String(elementIndex) as HydrationPath,
+          expectedPath: buildHydrationPath(null, elementIndex),
           actualPath: undefined,
         };
         options?.onMismatch?.(mismatch);
@@ -428,7 +433,7 @@ function hydrateNestedFragmentChildren(
       continue;
     }
 
-    const expectedPath = String(elementIndex) as HydrationPath;
+    const expectedPath = buildHydrationPath(null, elementIndex);
 
     let domNode = container.childNodes[domIndex];
     while (domNode && domNode.nodeType !== Node.ELEMENT_NODE) {

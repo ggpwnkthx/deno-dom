@@ -6,7 +6,7 @@
  */
 
 import type { VNode } from "@ggpwnkthx/jsx";
-import type { HydrationPath } from "@ggpwnkthx/dom-shared";
+import { type HydrationPath, isHydrationPath } from "@ggpwnkthx/dom-shared";
 
 export type MismatchKindWithVNode =
   | "tag-mismatch"
@@ -35,3 +35,29 @@ export interface MismatchExtra {
 }
 
 export type MismatchInfo = MismatchWithVNode | MismatchExtra;
+
+export function isMismatchInfo(value: unknown): value is MismatchInfo {
+  if (value === null || typeof value !== "object") return false;
+  const info = value as MismatchInfo;
+  return (
+    typeof info.kind === "string"
+    && (info.kind === "tag-mismatch"
+      || info.kind === "marker-mismatch"
+      || info.kind === "type-mismatch"
+      || info.kind === "missing-child"
+      || info.kind === "extra-child"
+      || info.kind === "extra-text")
+    && info.expectedPath !== undefined
+    && isHydrationPath(info.expectedPath)
+  );
+}
+
+export function isMismatchWithVNode(
+  info: MismatchInfo,
+): info is MismatchWithVNode {
+  return info.vnode !== null;
+}
+
+export function isMismatchExtra(info: MismatchInfo): info is MismatchExtra {
+  return info.vnode === null;
+}

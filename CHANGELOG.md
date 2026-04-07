@@ -23,6 +23,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `@ggpwnkthx/dom-runtime`: Updated import version reference in README to `@0.0.1-rc.3`
 
+## [0.0.1-rc.14] - 2026-04-07
+
+### Added
+
+- `@ggpwnkthx/dom-shared`: `parseHydrationPathFromString(value: string): HydrationPath | null` — validates a string against the `isHydrationPath` regex before returning a branded path; enables test helpers and external consumers to construct validated paths without DOM elements
+- `@ggpwnkthx/dom-hydrate`: `isMismatchInfo(value: unknown): value is MismatchInfo` type guard with full runtime validation (kind string, valid `MismatchKind` variant, and valid `HydrationPath` for `expectedPath`)
+- `@ggpwnkthx/dom-hydrate`: `isMismatchWithVNode(info: MismatchInfo): info is MismatchWithVNode` — narrows to vnode-bearing mismatch variants
+- `@ggpwnkthx/dom-hydrate`: `isMismatchExtra(info: MismatchInfo): info is MismatchExtra` — narrows to extra-child/extra-text variants
+- `@ggpwnkthx/dom-shared`: `buildHydrationPath` now validates its output at runtime, throwing `Error` if the constructed string fails `isHydrationPath` — provides defense-in-depth for the path factory
+- `@ggpwnkthx/dom`: Root facade `src/mod.ts` — resolved the empty TODO export, now re-exports a curated public API surface from all four leaf packages: `hydrate`, `hydrateResult`, `HydrationError`, `MismatchInfo`, `MismatchKind`, `mount`, `patch`, `schedule`, `Scheduler`, `SchedulerConfig`, `Result`, `DOMSharedError`, `InvariantError`, `NotImplementedError`, `ValidationError`, `err`, `ok`
+
+### Tests
+
+- `@ggpwnkthx/dom-hydrate`: `type-guards.test.ts` — 13 tests covering all `isMismatchInfo`, `isMismatchWithVNode`, and `isMismatchExtra` behaviors (true positives, null, primitives, missing kind, unknown kind, malformed path, missing path)
+- `@ggpwnkthx/dom-shared`: `hydration.test.ts` — 12 tests covering `isHydrationPath`, `parseHydrationPath`, `parseHydrationPathFromString`, and `buildHydrationPath`; added `parseHydrationPathFromString` coverage and a throw test for invalid constructed paths
+
+### Changed
+
+- `@ggpwnkthx/dom-hydrate`: All bare `as HydrationPath` casts at hydration call sites replaced with `buildHydrationPath(null, elementIndex)` — every path construction now routes through the validating factory; no unvalidated casts remain at call sites
+- `@ggpwnkthx/dom-hydrate`: `isMismatchInfo` guard simplified by removing redundant `info.kind !== undefined` check (the `typeof info.kind === "string"` check already returns false for undefined)
+- `@ggpwnkthx/dom-hydrate`: `isMismatchWithVNode` narrowed to `vnode !== null` (removed incorrect `domNode !== undefined` check that would reject valid `domNode: null` mismatches)
+- `@ggpwnkthx/dom-hydrate`: `hydrate.ts` now imports `parseHydrationPath` (from element) instead of `parseHydrationPathFromString` for DOM-based path parsing
+- `@ggpwnkthx/dom-hydrate`: `MismatchInfo` type guard and helpers exported from `hydrate/mod.ts` for consumer use
+- `@ggpwnkthx/dom-shared`: `buildHydrationPath` signature unchanged but now includes runtime assertion
+
+### Fixed
+
+- `@ggpwnkthx/dom-hydrate`: `detectExtraChildren` call at `hydrate.ts:359` used `"0" as HydrationPath` for the root path — replaced with `buildHydrationPath(null, 0)` for consistency
+
+### Documentation
+
+- Root `README.md` updated to accurately describe the facade: curated API re-exporting from all four leaf packages, with a dependency direction diagram
+- `@ggpwnkthx/dom-hydrate` README reflects that type guards (`isMismatchInfo`, `isMismatchWithVNode`, `isMismatchExtra`) are now part of the public API
+- `@ggpwnkthx/dom-shared` README reflects that `parseHydrationPathFromString` is now exported
+
 ## [0.0.1-rc.13] - 2026-04-06
 
 ### Added

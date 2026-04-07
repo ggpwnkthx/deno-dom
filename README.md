@@ -19,7 +19,30 @@ This workspace contains the following packages:
 
 ## Status
 
-**Working implementations** — all four packages (`shared`, `runtime`, `hydrate`, `scheduler`) have functional code and tests.
+**RC** — all four packages are functional with 252 passing tests. This is a pre-release version (`0.0.1-rc.14`).
+
+## Facade API
+
+This package re-exports a curated subset of APIs from the leaf packages for common use cases. For lower-level or advanced APIs, import directly from the specific package.
+
+```typescript
+import {
+  DOMSharedError,
+  err,
+  hydrate,
+  hydrateResult,
+  HydrationError,
+  InvariantError,
+  type MismatchInfo,
+  mount,
+  ok,
+  patch,
+  type Result,
+  schedule,
+  type Scheduler,
+  ValidationError,
+} from "jsr:@ggpwnkthx/dom@^0.0.1";
+```
 
 ## Dependency Direction
 
@@ -34,13 +57,3 @@ This workspace contains the following packages:
 @ggpwnkthx/dom-hydrate   → @ggpwnkthx/dom-runtime, @ggpwnkthx/dom-shared
 @ggpwnkthx/dom-scheduler → @ggpwnkthx/dom-shared (optional)
 ```
-
-## Quick Start
-
-```typescript
-import { ... } from "jsr:@ggpwnkthx/dom";
-```
-
-## Note
-
-This is the root facade package. It currently re-exports stable public APIs from `@ggpwnkthx/dom-shared`. Implementation logic lives in the leaf packages.
