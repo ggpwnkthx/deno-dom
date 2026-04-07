@@ -17,10 +17,6 @@ This workspace contains the following packages:
 | `@ggpwnkthx/dom-hydrate`   | SSR hydration behavior                       |
 | `@ggpwnkthx/dom-scheduler` | Microtask batching and rerender scheduling   |
 
-## Status
-
-**RC** — all four packages are functional with 252 passing tests. This is a pre-release version (`0.0.1-rc.14`).
-
 ## Facade API
 
 This package re-exports a curated subset of APIs from the leaf packages for common use cases. For lower-level or advanced APIs, import directly from the specific package.

@@ -1,6 +1,6 @@
 {
   "name": "@ggpwnkthx/dom",
-  "version": "0.0.1-rc.14",
+  "version": "0.0.1",
   "exports": {
     ".": "./src/mod.ts"
   },

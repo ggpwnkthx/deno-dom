@@ -9,8 +9,8 @@ Client DOM mount and patch behavior for `@ggpwnkthx/jsx` vnodes.
 ## Public API
 
 ```ts
-import { mount, patch } from "jsr:@ggpwnkthx/dom-runtime@0.0.1-rc.3";
-import type { VNode } from "jsr:@ggpwnkthx/dom-runtime@0.0.1-rc.3";
+import { mount, patch } from "jsr:@ggpwnkthx/dom-runtime";
+import type { VNode } from "jsr:@ggpwnkthx/dom-runtime";
 
 mount(vnode: VNode, container: ParentNode): void;
 patch(oldVNode: VNode, newVNode: VNode, domNode: Node, parentDom: ParentNode): Node;
