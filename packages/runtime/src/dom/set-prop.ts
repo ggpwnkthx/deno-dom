@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - DOM property setter utilities.
+ * DOM property setter utilities for setting and removing element properties, attributes, and styles.
  * @module
  */
 
@@ -65,6 +65,19 @@ function removeStyleProp(el: Element): void {
   }
 }
 
+/**
+ * Sets a property, attribute, or style on an element.
+ * Handles special cases: class, id, value, checked, selected, data-*, aria-*, style.
+ * @param el - The element to set the property on
+ * @param name - The property/attribute name
+ * @param value - The value to set
+ * @example
+ * ```ts
+ * setProp(el, "class", "active");
+ * setProp(el, "data-id", "123");
+ * setProp(el, "aria-label", "Close");
+ * ```
+ */
 export function setProp(el: Element, name: string, value: unknown): void {
   assertIsNotEventProp(name);
   if (value === null || value === undefined) {
@@ -113,6 +126,17 @@ export function setProp(el: Element, name: string, value: unknown): void {
   el.setAttribute(name, String(value));
 }
 
+/**
+ * Removes a property, attribute, or style from an element.
+ * Handles special cases: class, id, value, checked, selected, data-*, aria-*, style.
+ * @param el - The element to remove the property from
+ * @param name - The property/attribute name to remove
+ * @example
+ * ```ts
+ * removeProp(el, "class");
+ * removeProp(el, "data-id");
+ * ```
+ */
 export function removeProp(el: Element, name: string): void {
   assertIsNotEventProp(name);
   if (name === "class") {
@@ -150,6 +174,15 @@ export function removeProp(el: Element, name: string): void {
   el.removeAttribute(name);
 }
 
+/**
+ * Sets the text content of a text node.
+ * @param node - The text node to update
+ * @param text - The text value to set (converted to string)
+ * @example
+ * ```ts
+ * setText(textNode, "Hello, World!");
+ * ```
+ */
 export function setText(node: Text, text: string | number): void {
   node.textContent = String(text);
 }

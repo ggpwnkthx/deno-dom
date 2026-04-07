@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-hydrate - SSR hydration behavior.
+ * SSR hydration behavior for hydrating server-rendered VNodes into existing DOM trees.
  * @module
  */
 

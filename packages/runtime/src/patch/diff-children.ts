@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - Children diffing utility.
+ * Children diffing utility for comparing and updating VNode children.
  * @module
  */
 
@@ -7,6 +7,10 @@ import type { VNode } from "@ggpwnkthx/jsx";
 import { createDom } from "../dom/mod.ts";
 import { removeDomRef, setDomRef } from "../types.ts";
 
+/**
+ * A function type that patches a VNode to match a new VNode, returning the new DOM node.
+ * Used by diffChildren to recursively patch child nodes.
+ */
 export type PatchFn = (
   oldVNode: VNode,
   newVNode: VNode,
@@ -55,6 +59,15 @@ function diffArrayChildren(
   }
 }
 
+/**
+ * Diffs the children of a DOM node and patches them to match the new VNode children.
+ * Handles adding, removing, and updating child nodes as needed.
+ * @param patch - The patch function to apply to each child
+ * @param domNode - The parent DOM node whose children to diff
+ * @param oldChildren - The old VNode children array
+ * @param newChildren - The new VNode children array
+ * @param depth - The current recursion depth
+ */
 export function diffChildren(
   patch: PatchFn,
   domNode: Node,
@@ -73,6 +86,16 @@ export function diffChildren(
   );
 }
 
+/**
+ * Diffs children within a specific range of a parent DOM node.
+ * Used for fragment children where only a portion of the parent's children are relevant.
+ * @param patch - The patch function to apply to each child
+ * @param parentDom - The parent DOM node
+ * @param startIndex - The index where the fragment's children start in the parent
+ * @param oldChildren - The old VNode children array
+ * @param newChildren - The new VNode children array
+ * @param depth - The current recursion depth
+ */
 export function diffFragmentChildren(
   patch: PatchFn,
   parentDom: ParentNode,

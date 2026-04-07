@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.2] - 2026-04-07
+
+### Added
+
+- All packages: Comprehensive JSDoc documentation for all exported functions, types, interfaces, and constants. Documentation includes:
+  - `@ggpwnkthx/dom-hydrate`: `formatMismatchKind`, `formatMismatch`, `warnMismatch`, `HydrationError` class and factory functions, `hydrate` with `HydrateOptions` interface, `hydrateResult`, type guards (`isMismatchInfo`, `isMismatchWithVNode`, `isMismatchExtra`)
+  - `@ggpwnkthx/dom-runtime`: `createDom`, `replaceNode`, `setProp`, `removeProp`, `setText`, `normalizeAriaName`, event utilities (`isEventProp`, `normalizeEventName`, `assertIsNotEventProp`, `addEventListener`, `removeEventListener`, `setEventHandler`), `mount`, `diffChildren`, `diffFragmentChildren`, `patchFragment`, `patchProps`, `patchText`, DOM ref management functions
+  - `@ggpwnkthx/dom-scheduler`: `LoopGuard` interface, `createLoopGuard`, `nextId`, `createSchedulerInstance`, `Queue` interface, `createQueue`, scheduler functions (`queueUpdate`, `schedule`, `flushUpdates`, `getDiagnostics`, `resetScheduler`, `createScheduler`), all scheduler types
+  - `@ggpwnkthx/dom-shared`: `formatMismatchKind`, `DOMSharedError`, `Result` type, `ok`, `err`, hydration helpers, type guards, validation functions, `Brand` type, `isContainerId`, `isNodeId`
+  - Module-level JSDoc descriptions updated for all public entry points
+
+### Changed
+
+- All packages: Version bumped from 0.0.1 to 0.0.2 (`@ggpwnkthx/dom`, `@ggpwnkthx/dom-hydrate`, `@ggpwnkthx/dom-runtime`, `@ggpwnkthx/dom-scheduler`, `@ggpwnkthx/dom-shared`)
+
 ## [0.0.1-rc.12] - 2026-04-06
 
 ### Tests

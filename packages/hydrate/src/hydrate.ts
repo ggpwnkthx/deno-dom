@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-hydrate - SSR hydration implementation.
+ * SSR hydration implementation for reconciling server-rendered HTML with VNodes.
  * @module
  */
 
@@ -44,10 +44,29 @@ import type { Result } from "@ggpwnkthx/dom-shared";
 const MAX_HYDRATE_DEPTH = 1000;
 const HYDRATION_MARKER = "data-hk";
 
+/**
+ * Options for the hydrate function.
+ */
 export interface HydrateOptions {
+  /** Callback invoked when a hydration mismatch is detected. */
   onMismatch?: (info: MismatchInfo) => void;
 }
 
+/**
+ * Hydrates server-rendered VNodes into an existing DOM tree.
+ * @param vnode - The VNode to hydrate
+ * @param container - The parent node to hydrate into
+ * @param options - Optional hydration configuration
+ * @returns The hydrated VNode
+ * @throws {InvariantError} If vnode is not a valid VNode
+ * @example
+ * ```ts
+ * const container = document.getElementById("app")!;
+ * hydrate(vnode, container, {
+ *   onMismatch: (info) => console.warn("Mismatch:", info.kind),
+ * });
+ * ```
+ */
 export function hydrate(
   vnode: VNode,
   container: ParentNode,
@@ -111,6 +130,22 @@ function mapInvariantToHydrationError(e: unknown): HydrationError {
   );
 }
 
+/**
+ * Hydrates server-rendered VNodes into an existing DOM tree, returning a Result.
+ * @param vnode - The VNode to hydrate
+ * @param container - The parent node to hydrate into
+ * @param options - Optional hydration configuration
+ * @returns A Result containing the hydrated VNode or a HydrationError
+ * @example
+ * ```ts
+ * const result = hydrateResult(vnode, container);
+ * if (result.ok) {
+ *   console.log("Hydration successful");
+ * } else {
+ *   console.error("Hydration failed:", result.error);
+ * }
+ * ```
+ */
 export function hydrateResult(
   vnode: VNode,
   container: ParentNode,

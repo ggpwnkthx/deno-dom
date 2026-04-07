@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-scheduler - Scheduler instance creation.
+ * Scheduler instance creation combining queue, loop guard, and microtask scheduling.
  * @module
  */
 
@@ -15,6 +15,11 @@ import { createQueue, type Queue } from "./queue.ts";
 import { createLoopGuard, type LoopGuard } from "./guards.ts";
 import { nextId } from "./id.ts";
 
+/**
+ * Creates a scheduler instance with queue, loop guard, and microtask scheduling.
+ * @param config - Optional scheduler configuration
+ * @returns A Scheduler instance
+ */
 export function createSchedulerInstance(config?: SchedulerConfig): Scheduler {
   let queue: Queue;
   let loopGuard: LoopGuard;

@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom - Umbrella package for the DOM package family.
+ * Umbrella package for the DOM package family.
  *
  * This facade provides a curated API for the most common use cases.
  * For lower-level or advanced APIs, import directly from the specific package:

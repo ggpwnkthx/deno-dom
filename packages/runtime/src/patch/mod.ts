@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - Patch behavior.
+ * Patch behavior for updating existing DOM nodes to match new VNodes.
  * @module
  */
 
@@ -22,6 +22,22 @@ import { diffChildren, diffFragmentChildren, type PatchFn } from "./diff-childre
 
 const MAX_PATCH_DEPTH = 1000;
 
+/**
+ * Patches an existing DOM node to match a new VNode.
+ * Updates the DOM in-place by comparing old and new VNodes.
+ * Handles element, text, and fragment node types.
+ * @param oldVNode - The previous VNode
+ * @param newVNode - The new VNode to patch to
+ * @param domNode - The current DOM node to update
+ * @param parentDom - The parent DOM node (used for DOM reference management)
+ * @param depth - Current recursion depth (prevents stack overflow)
+ * @returns The updated DOM node (may be the same or a replacement)
+ * @throws {InvariantError} If inputs are not valid VNodes or max depth is exceeded
+ * @example
+ * ```ts
+ * const newDom = patch(oldVNode, newVNode, currentDom, parentDom);
+ * ```
+ */
 function patch(
   oldVNode: VNode,
   newVNode: VNode,

@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - Low-level DOM creation primitives.
+ * Low-level DOM creation primitives for converting VNodes to DOM nodes.
  * @module
  */
 
@@ -16,6 +16,18 @@ import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { setProp } from "./set-prop.ts";
 import { isEventProp, setEventHandler } from "../events.ts";
 
+/**
+ * Creates a DOM node from a VNode.
+ * Handles TextVNode and ElementVNode types.
+ * @param vnode - The VNode to convert to a DOM node
+ * @returns A DOM Node (Text or Element)
+ * @throws {InvariantError} If the VNode is a FragmentVNode or ComponentVNode
+ * @example
+ * ```ts
+ * const textVNode = { kind: "text", type: "Hello" };
+ * const textNode = createDom(textVNode); // Text node
+ * ```
+ */
 export function createDom(vnode: VNode): Node {
   if (isTextVNode(vnode)) {
     return createTextNode(vnode);
@@ -55,6 +67,17 @@ function createElementNode(vnode: ElementVNode): Element {
   return el;
 }
 
+/**
+ * Replaces an old DOM node with a new DOM node in its parent.
+ * @param oldDom - The DOM node to replace
+ * @param newDom - The new DOM node to insert
+ * @example
+ * ```ts
+ * const oldNode = document.getElementById("old")!;
+ * const newNode = document.createElement("div");
+ * replaceNode(oldNode, newNode);
+ * ```
+ */
 export function replaceNode(oldDom: Node, newDom: Node): void {
   oldDom.parentNode?.replaceChild(newDom, oldDom);
 }

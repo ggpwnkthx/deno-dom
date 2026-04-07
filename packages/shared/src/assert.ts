@@ -1,3 +1,10 @@
+/**
+ * Assertion functions for validating internal invariants and external input.
+ * Use assert* functions for conditions that should never fail in correct program flow.
+ * Use require* functions for validating untrusted input.
+ * @module
+ */
+
 import { InvariantError, NotImplementedError, ValidationError } from "./errors.ts";
 import { isBoolean, isFunction, isNonNull, isNumber, isString } from "./validation.ts";
 
@@ -37,6 +44,8 @@ export function assertNotImplemented(api: string): never {
 
 /**
  * Asserts that value is a string.
+ * @param value - The value to assert
+ * @param message - Custom error message if assertion fails
  * @throws {ValidationError}
  */
 export function assertString(
@@ -50,6 +59,8 @@ export function assertString(
 
 /**
  * Asserts that value is a number.
+ * @param value - The value to assert
+ * @param message - Custom error message if assertion fails
  * @throws {ValidationError}
  */
 export function assertNumber(
@@ -63,6 +74,8 @@ export function assertNumber(
 
 /**
  * Asserts that value is a function.
+ * @param value - The value to assert
+ * @param message - Custom error message if assertion fails
  * @throws {ValidationError}
  */
 export function assertFunction(
@@ -76,6 +89,8 @@ export function assertFunction(
 
 /**
  * Asserts that value is a boolean.
+ * @param value - The value to assert
+ * @param message - Custom error message if assertion fails
  * @throws {ValidationError}
  */
 export function assertBoolean(

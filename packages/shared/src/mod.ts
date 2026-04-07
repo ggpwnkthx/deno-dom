@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-shared - Shared types, errors, and validation helpers.
+ * Shared types, errors, and validation helpers for the DOM package family.
  * @module
  */
 

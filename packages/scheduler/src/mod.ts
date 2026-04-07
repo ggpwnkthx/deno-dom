@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-scheduler - Microtask batching and rerender scheduling.
+ * Microtask batching and rerender scheduling for efficient updates.
  * @module
  */
 

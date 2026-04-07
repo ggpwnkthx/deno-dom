@@ -1,27 +1,62 @@
+/**
+ * Type guards and validation functions for runtime type checking.
+ * @module
+ */
+
 import { ValidationError } from "./errors.ts";
 
+/**
+ * Type guard to check if a value is a string.
+ * @param value - The value to check
+ * @returns True if the value is a string
+ */
 export function isString(value: unknown): value is string {
   return typeof value === "string";
 }
 
+/**
+ * Type guard to check if a value is a number.
+ * @param value - The value to check
+ * @returns True if the value is a number
+ */
 export function isNumber(value: unknown): value is number {
   return typeof value === "number";
 }
 
+/**
+ * Type guard to check if a value is a function.
+ * @param value - The value to check
+ * @returns True if the value is a function
+ */
 export function isFunction(
   value: unknown,
 ): value is (...args: unknown[]) => unknown {
   return typeof value === "function";
 }
 
+/**
+ * Type guard to check if a value is a boolean.
+ * @param value - The value to check
+ * @returns True if the value is a boolean
+ */
 export function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
 
+/**
+ * Type guard to check if a value is not null or undefined.
+ * @param value - The value to check
+ * @returns True if the value is not null or undefined
+ */
 export function isNonNull<T>(value: T): value is NonNullable<T> {
   return value !== null && value !== undefined;
 }
 
+/**
+ * Type guard to check if a value is promise-like (has a `.then` method).
+ * @param value - The value to check
+ * @returns True if the value has a then method
+ */
 export function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
   return isObject(value) && isFunction((value as Record<string, unknown>)["then"]);
 }

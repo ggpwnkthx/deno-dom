@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - Property patching.
+ * Property patching for comparing and updating element props and attributes.
  * @module
  */
 
@@ -7,6 +7,15 @@ import { InvariantError } from "@ggpwnkthx/dom-shared";
 import { removeProp, setProp } from "../dom/mod.ts";
 import { isEventProp, setEventHandler } from "../events.ts";
 
+/**
+ * Patches the properties and attributes of an element by comparing old and new props.
+ * Adds, updates, or removes attributes as needed.
+ * Handles event handlers specially by using setEventHandler with the old handler.
+ * @param el - The element to patch
+ * @param oldProps - The previous props object
+ * @param newProps - The new props object
+ * @throws {InvariantError} If an event prop does not have a function value
+ */
 export function patchProps(
   el: Element,
   oldProps: Record<string, unknown>,

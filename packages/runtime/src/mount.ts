@@ -1,5 +1,5 @@
 /**
- * @ggpwnkthx/dom-runtime - Mount behavior.
+ * Mount behavior for converting VNode trees into DOM nodes.
  * @module
  */
 
@@ -18,6 +18,18 @@ import { InvariantError } from "@ggpwnkthx/dom-shared";
 
 const MAX_MOUNT_DEPTH = 1000;
 
+/**
+ * Mounts a VNode tree to a DOM container.
+ * Converts the VNode and all its children into real DOM nodes and appends them to the container.
+ * @param vnode - The VNode to mount
+ * @param container - The parent DOM node to append the mounted nodes to
+ * @throws {InvariantError} If vnode is not a valid VNode or max depth is exceeded
+ * @example
+ * ```ts
+ * const vnode = { kind: "element", type: "div", props: { class: "container" } };
+ * mount(vnode, document.getElementById("app")!);
+ * ```
+ */
 export function mount(vnode: VNode, container: ParentNode): void {
   if (!isVNode(vnode)) {
     throw new InvariantError(

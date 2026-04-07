@@ -1,5 +1,6 @@
 /**
- * @ggpwnkthx/dom-runtime - Client DOM mount and patch behavior.
+ * Client DOM mount and patch behavior.
+ * Provides functions for mounting VNode trees to the DOM and patching existing DOM nodes.
  * @module
  */
 
