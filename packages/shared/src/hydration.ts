@@ -1,5 +1,3 @@
-/// <reference lib="dom" />
-
 /**
  * @ggpwnkthx/dom-shared - Hydration marker types and helpers.
  * @module

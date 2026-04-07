@@ -1,5 +1,3 @@
-/// <reference lib="dom" />
-
 /**
  * @ggpwnkthx/dom-hydrate - SSR hydration implementation.
  * @module

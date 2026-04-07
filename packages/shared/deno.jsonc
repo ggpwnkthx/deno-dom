@@ -20,7 +20,8 @@
     }
   },
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "lib": ["deno.ns", "dom"]
   },
   "exclude": [".*", "coverage"]
 }
