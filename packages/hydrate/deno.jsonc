@@ -7,7 +7,7 @@
   "imports": {
     "@std/assert": "jsr:@std/assert@^1",
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1",
-    "@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@^0.0",
+    "@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@^0.0.3",
     "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1"
   },
   "fmt": {
