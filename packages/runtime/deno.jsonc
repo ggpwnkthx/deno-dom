@@ -27,6 +27,6 @@
   "imports": {
     "@ggpwnkthx/dom-shared": "jsr:@ggpwnkthx/dom-shared@^0.0",
     "@ggpwnkthx/jsx": "jsr:@ggpwnkthx/jsx@^0.1.8",
-    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1"
+    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.56"
   }
 }

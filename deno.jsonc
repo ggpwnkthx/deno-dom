@@ -6,7 +6,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1",
-    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1"
+    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.56"
   },
   "workspace": [
     "./packages/shared",
